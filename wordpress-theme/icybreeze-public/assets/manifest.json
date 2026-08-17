@@ -1,0 +1,242 @@
+{
+  "node_modules/@fontsource/league-spartan/files/league-spartan-latin-600-normal.woff": {
+    "file": "assets/league-spartan-latin-600-normal-DXHl7Rg9.woff",
+    "src": "node_modules/@fontsource/league-spartan/files/league-spartan-latin-600-normal.woff"
+  },
+  "node_modules/@fontsource/league-spartan/files/league-spartan-latin-600-normal.woff2": {
+    "file": "assets/league-spartan-latin-600-normal-DHjw6l_K.woff2",
+    "src": "node_modules/@fontsource/league-spartan/files/league-spartan-latin-600-normal.woff2"
+  },
+  "node_modules/@fontsource/league-spartan/files/league-spartan-latin-700-normal.woff": {
+    "file": "assets/league-spartan-latin-700-normal-D-5a3uka.woff",
+    "src": "node_modules/@fontsource/league-spartan/files/league-spartan-latin-700-normal.woff"
+  },
+  "node_modules/@fontsource/league-spartan/files/league-spartan-latin-700-normal.woff2": {
+    "file": "assets/league-spartan-latin-700-normal-CtwlLP3z.woff2",
+    "src": "node_modules/@fontsource/league-spartan/files/league-spartan-latin-700-normal.woff2"
+  },
+  "node_modules/@fontsource/league-spartan/files/league-spartan-latin-ext-600-normal.woff": {
+    "file": "assets/league-spartan-latin-ext-600-normal-BYU5cLYt.woff",
+    "src": "node_modules/@fontsource/league-spartan/files/league-spartan-latin-ext-600-normal.woff"
+  },
+  "node_modules/@fontsource/league-spartan/files/league-spartan-latin-ext-600-normal.woff2": {
+    "file": "assets/league-spartan-latin-ext-600-normal-nMNwaRqy.woff2",
+    "src": "node_modules/@fontsource/league-spartan/files/league-spartan-latin-ext-600-normal.woff2"
+  },
+  "node_modules/@fontsource/league-spartan/files/league-spartan-latin-ext-700-normal.woff": {
+    "file": "assets/league-spartan-latin-ext-700-normal-DQ9i1Vnk.woff",
+    "src": "node_modules/@fontsource/league-spartan/files/league-spartan-latin-ext-700-normal.woff"
+  },
+  "node_modules/@fontsource/league-spartan/files/league-spartan-latin-ext-700-normal.woff2": {
+    "file": "assets/league-spartan-latin-ext-700-normal-BwN75zDi.woff2",
+    "src": "node_modules/@fontsource/league-spartan/files/league-spartan-latin-ext-700-normal.woff2"
+  },
+  "node_modules/@fontsource/league-spartan/files/league-spartan-vietnamese-600-normal.woff": {
+    "file": "assets/league-spartan-vietnamese-600-normal-DkVdIeVx.woff",
+    "src": "node_modules/@fontsource/league-spartan/files/league-spartan-vietnamese-600-normal.woff"
+  },
+  "node_modules/@fontsource/league-spartan/files/league-spartan-vietnamese-600-normal.woff2": {
+    "file": "assets/league-spartan-vietnamese-600-normal-Cot-T8d4.woff2",
+    "src": "node_modules/@fontsource/league-spartan/files/league-spartan-vietnamese-600-normal.woff2"
+  },
+  "node_modules/@fontsource/league-spartan/files/league-spartan-vietnamese-700-normal.woff": {
+    "file": "assets/league-spartan-vietnamese-700-normal-Dn0E2a1W.woff",
+    "src": "node_modules/@fontsource/league-spartan/files/league-spartan-vietnamese-700-normal.woff"
+  },
+  "node_modules/@fontsource/league-spartan/files/league-spartan-vietnamese-700-normal.woff2": {
+    "file": "assets/league-spartan-vietnamese-700-normal-BhNxTXKp.woff2",
+    "src": "node_modules/@fontsource/league-spartan/files/league-spartan-vietnamese-700-normal.woff2"
+  },
+  "node_modules/@fontsource/poppins/files/poppins-devanagari-400-normal.woff": {
+    "file": "assets/poppins-devanagari-400-normal-CqVvlrh5.woff",
+    "src": "node_modules/@fontsource/poppins/files/poppins-devanagari-400-normal.woff"
+  },
+  "node_modules/@fontsource/poppins/files/poppins-devanagari-400-normal.woff2": {
+    "file": "assets/poppins-devanagari-400-normal-CJDn6rn8.woff2",
+    "src": "node_modules/@fontsource/poppins/files/poppins-devanagari-400-normal.woff2"
+  },
+  "node_modules/@fontsource/poppins/files/poppins-devanagari-500-normal.woff": {
+    "file": "assets/poppins-devanagari-500-normal-DMPDjHtT.woff",
+    "src": "node_modules/@fontsource/poppins/files/poppins-devanagari-500-normal.woff"
+  },
+  "node_modules/@fontsource/poppins/files/poppins-devanagari-500-normal.woff2": {
+    "file": "assets/poppins-devanagari-500-normal-BIdkeU1p.woff2",
+    "src": "node_modules/@fontsource/poppins/files/poppins-devanagari-500-normal.woff2"
+  },
+  "node_modules/@fontsource/poppins/files/poppins-devanagari-600-normal.woff": {
+    "file": "assets/poppins-devanagari-600-normal-ClASKHrr.woff",
+    "src": "node_modules/@fontsource/poppins/files/poppins-devanagari-600-normal.woff"
+  },
+  "node_modules/@fontsource/poppins/files/poppins-devanagari-600-normal.woff2": {
+    "file": "assets/poppins-devanagari-600-normal-STEjXBNN.woff2",
+    "src": "node_modules/@fontsource/poppins/files/poppins-devanagari-600-normal.woff2"
+  },
+  "node_modules/@fontsource/poppins/files/poppins-devanagari-700-normal.woff": {
+    "file": "assets/poppins-devanagari-700-normal-fHs-vx92.woff",
+    "src": "node_modules/@fontsource/poppins/files/poppins-devanagari-700-normal.woff"
+  },
+  "node_modules/@fontsource/poppins/files/poppins-devanagari-700-normal.woff2": {
+    "file": "assets/poppins-devanagari-700-normal-O-jipLrW.woff2",
+    "src": "node_modules/@fontsource/poppins/files/poppins-devanagari-700-normal.woff2"
+  },
+  "node_modules/@fontsource/poppins/files/poppins-latin-400-normal.woff": {
+    "file": "assets/poppins-latin-400-normal-BOb3E3N0.woff",
+    "src": "node_modules/@fontsource/poppins/files/poppins-latin-400-normal.woff"
+  },
+  "node_modules/@fontsource/poppins/files/poppins-latin-400-normal.woff2": {
+    "file": "assets/poppins-latin-400-normal-cpxAROuN.woff2",
+    "src": "node_modules/@fontsource/poppins/files/poppins-latin-400-normal.woff2"
+  },
+  "node_modules/@fontsource/poppins/files/poppins-latin-500-normal.woff": {
+    "file": "assets/poppins-latin-500-normal-DGXqpDMm.woff",
+    "src": "node_modules/@fontsource/poppins/files/poppins-latin-500-normal.woff"
+  },
+  "node_modules/@fontsource/poppins/files/poppins-latin-500-normal.woff2": {
+    "file": "assets/poppins-latin-500-normal-C8OXljZJ.woff2",
+    "src": "node_modules/@fontsource/poppins/files/poppins-latin-500-normal.woff2"
+  },
+  "node_modules/@fontsource/poppins/files/poppins-latin-600-normal.woff": {
+    "file": "assets/poppins-latin-600-normal-BJdTmd5m.woff",
+    "src": "node_modules/@fontsource/poppins/files/poppins-latin-600-normal.woff"
+  },
+  "node_modules/@fontsource/poppins/files/poppins-latin-600-normal.woff2": {
+    "file": "assets/poppins-latin-600-normal-zEkxB9Mr.woff2",
+    "src": "node_modules/@fontsource/poppins/files/poppins-latin-600-normal.woff2"
+  },
+  "node_modules/@fontsource/poppins/files/poppins-latin-700-normal.woff": {
+    "file": "assets/poppins-latin-700-normal-BVuQR_eA.woff",
+    "src": "node_modules/@fontsource/poppins/files/poppins-latin-700-normal.woff"
+  },
+  "node_modules/@fontsource/poppins/files/poppins-latin-700-normal.woff2": {
+    "file": "assets/poppins-latin-700-normal-Qrb0O0WB.woff2",
+    "src": "node_modules/@fontsource/poppins/files/poppins-latin-700-normal.woff2"
+  },
+  "node_modules/@fontsource/poppins/files/poppins-latin-ext-400-normal.woff": {
+    "file": "assets/poppins-latin-ext-400-normal-DaBSavcJ.woff",
+    "src": "node_modules/@fontsource/poppins/files/poppins-latin-ext-400-normal.woff"
+  },
+  "node_modules/@fontsource/poppins/files/poppins-latin-ext-400-normal.woff2": {
+    "file": "assets/poppins-latin-ext-400-normal-by3JarPu.woff2",
+    "src": "node_modules/@fontsource/poppins/files/poppins-latin-ext-400-normal.woff2"
+  },
+  "node_modules/@fontsource/poppins/files/poppins-latin-ext-500-normal.woff": {
+    "file": "assets/poppins-latin-ext-500-normal-CgAe2rWW.woff",
+    "src": "node_modules/@fontsource/poppins/files/poppins-latin-ext-500-normal.woff"
+  },
+  "node_modules/@fontsource/poppins/files/poppins-latin-ext-500-normal.woff2": {
+    "file": "assets/poppins-latin-ext-500-normal-CK-6C4Hw.woff2",
+    "src": "node_modules/@fontsource/poppins/files/poppins-latin-ext-500-normal.woff2"
+  },
+  "node_modules/@fontsource/poppins/files/poppins-latin-ext-600-normal.woff": {
+    "file": "assets/poppins-latin-ext-600-normal-Df5ffKXP.woff",
+    "src": "node_modules/@fontsource/poppins/files/poppins-latin-ext-600-normal.woff"
+  },
+  "node_modules/@fontsource/poppins/files/poppins-latin-ext-600-normal.woff2": {
+    "file": "assets/poppins-latin-ext-600-normal-CAhIAdZj.woff2",
+    "src": "node_modules/@fontsource/poppins/files/poppins-latin-ext-600-normal.woff2"
+  },
+  "node_modules/@fontsource/poppins/files/poppins-latin-ext-700-normal.woff": {
+    "file": "assets/poppins-latin-ext-700-normal-DctTR6Tg.woff",
+    "src": "node_modules/@fontsource/poppins/files/poppins-latin-ext-700-normal.woff"
+  },
+  "node_modules/@fontsource/poppins/files/poppins-latin-ext-700-normal.woff2": {
+    "file": "assets/poppins-latin-ext-700-normal-cby-RkWa.woff2",
+    "src": "node_modules/@fontsource/poppins/files/poppins-latin-ext-700-normal.woff2"
+  },
+  "node_modules/@phosphor-icons/web/src/fill/Phosphor-Fill.svg": {
+    "file": "assets/Phosphor-Fill-BofDnXwa.svg",
+    "src": "node_modules/@phosphor-icons/web/src/fill/Phosphor-Fill.svg"
+  },
+  "node_modules/@phosphor-icons/web/src/fill/Phosphor-Fill.ttf": {
+    "file": "assets/Phosphor-Fill-N9gYSHy0.ttf",
+    "src": "node_modules/@phosphor-icons/web/src/fill/Phosphor-Fill.ttf"
+  },
+  "node_modules/@phosphor-icons/web/src/fill/Phosphor-Fill.woff": {
+    "file": "assets/Phosphor-Fill-CS2zOYDV.woff",
+    "src": "node_modules/@phosphor-icons/web/src/fill/Phosphor-Fill.woff"
+  },
+  "node_modules/@phosphor-icons/web/src/fill/Phosphor-Fill.woff2": {
+    "file": "assets/Phosphor-Fill-D4CDmGRg.woff2",
+    "src": "node_modules/@phosphor-icons/web/src/fill/Phosphor-Fill.woff2"
+  },
+  "node_modules/@phosphor-icons/web/src/regular/Phosphor.svg": {
+    "file": "assets/Phosphor-BXRFlF4V.svg",
+    "src": "node_modules/@phosphor-icons/web/src/regular/Phosphor.svg"
+  },
+  "node_modules/@phosphor-icons/web/src/regular/Phosphor.ttf": {
+    "file": "assets/Phosphor-CDxgqcPu.ttf",
+    "src": "node_modules/@phosphor-icons/web/src/regular/Phosphor.ttf"
+  },
+  "node_modules/@phosphor-icons/web/src/regular/Phosphor.woff": {
+    "file": "assets/Phosphor-BdqudwT5.woff",
+    "src": "node_modules/@phosphor-icons/web/src/regular/Phosphor.woff"
+  },
+  "node_modules/@phosphor-icons/web/src/regular/Phosphor.woff2": {
+    "file": "assets/Phosphor-DtdjzkpE.woff2",
+    "src": "node_modules/@phosphor-icons/web/src/regular/Phosphor.woff2"
+  },
+  "resources/css/app.css": {
+    "file": "assets/app-D-vLirv7.css",
+    "src": "resources/css/app.css",
+    "isEntry": true,
+    "name": "app",
+    "names": [
+      "app.css"
+    ]
+  },
+  "resources/js/app.js": {
+    "file": "assets/app-Dse7K38l.js",
+    "name": "app",
+    "src": "resources/js/app.js",
+    "isEntry": true,
+    "css": [
+      "assets/app-Cy4NUfxW.css"
+    ],
+    "assets": [
+      "assets/Phosphor-DtdjzkpE.woff2",
+      "assets/Phosphor-BdqudwT5.woff",
+      "assets/Phosphor-CDxgqcPu.ttf",
+      "assets/Phosphor-BXRFlF4V.svg",
+      "assets/Phosphor-Fill-D4CDmGRg.woff2",
+      "assets/Phosphor-Fill-CS2zOYDV.woff",
+      "assets/Phosphor-Fill-N9gYSHy0.ttf",
+      "assets/Phosphor-Fill-BofDnXwa.svg",
+      "assets/poppins-devanagari-400-normal-CJDn6rn8.woff2",
+      "assets/poppins-devanagari-400-normal-CqVvlrh5.woff",
+      "assets/poppins-latin-ext-400-normal-by3JarPu.woff2",
+      "assets/poppins-latin-ext-400-normal-DaBSavcJ.woff",
+      "assets/poppins-latin-400-normal-cpxAROuN.woff2",
+      "assets/poppins-latin-400-normal-BOb3E3N0.woff",
+      "assets/poppins-devanagari-500-normal-BIdkeU1p.woff2",
+      "assets/poppins-devanagari-500-normal-DMPDjHtT.woff",
+      "assets/poppins-latin-ext-500-normal-CK-6C4Hw.woff2",
+      "assets/poppins-latin-ext-500-normal-CgAe2rWW.woff",
+      "assets/poppins-latin-500-normal-C8OXljZJ.woff2",
+      "assets/poppins-latin-500-normal-DGXqpDMm.woff",
+      "assets/poppins-devanagari-600-normal-STEjXBNN.woff2",
+      "assets/poppins-devanagari-600-normal-ClASKHrr.woff",
+      "assets/poppins-latin-ext-600-normal-CAhIAdZj.woff2",
+      "assets/poppins-latin-ext-600-normal-Df5ffKXP.woff",
+      "assets/poppins-latin-600-normal-zEkxB9Mr.woff2",
+      "assets/poppins-latin-600-normal-BJdTmd5m.woff",
+      "assets/poppins-devanagari-700-normal-O-jipLrW.woff2",
+      "assets/poppins-devanagari-700-normal-fHs-vx92.woff",
+      "assets/poppins-latin-ext-700-normal-cby-RkWa.woff2",
+      "assets/poppins-latin-ext-700-normal-DctTR6Tg.woff",
+      "assets/poppins-latin-700-normal-Qrb0O0WB.woff2",
+      "assets/poppins-latin-700-normal-BVuQR_eA.woff",
+      "assets/league-spartan-vietnamese-600-normal-Cot-T8d4.woff2",
+      "assets/league-spartan-vietnamese-600-normal-DkVdIeVx.woff",
+      "assets/league-spartan-latin-ext-600-normal-nMNwaRqy.woff2",
+      "assets/league-spartan-latin-ext-600-normal-BYU5cLYt.woff",
+      "assets/league-spartan-latin-600-normal-DHjw6l_K.woff2",
+      "assets/league-spartan-latin-600-normal-DXHl7Rg9.woff",
+      "assets/league-spartan-vietnamese-700-normal-BhNxTXKp.woff2",
+      "assets/league-spartan-vietnamese-700-normal-Dn0E2a1W.woff",
+      "assets/league-spartan-latin-ext-700-normal-BwN75zDi.woff2",
+      "assets/league-spartan-latin-ext-700-normal-DQ9i1Vnk.woff",
+      "assets/league-spartan-latin-700-normal-CtwlLP3z.woff2",
+      "assets/league-spartan-latin-700-normal-D-5a3uka.woff"
+    ]
+  }
+}
