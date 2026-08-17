@@ -4,6 +4,7 @@
 .env.*
 !.env.example
 .phpunit.result.cache
+bootstrap/cache/*.php
 node_modules
 vendor
 public/build

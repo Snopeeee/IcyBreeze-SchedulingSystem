@@ -57,7 +57,7 @@ docker compose down -v # Also removes the Docker database and generated app key.
 Set another host port when `8080` is already in use:
 
 ```powershell
-$env:APP_PORT=8081
+$env:DOCKER_APP_PORT=8081
 docker compose up --build -d
 ```
 
