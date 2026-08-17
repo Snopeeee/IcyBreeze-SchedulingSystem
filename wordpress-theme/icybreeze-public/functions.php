@@ -28,26 +28,12 @@ function icybreeze_page_url( $slug ) {
     return $page ? get_permalink( $page ) : home_url( '/' . trim( $slug, '/' ) . '/' );
 }
 
-function icybreeze_manifest() {
-    static $manifest = null;
-
-    if ( null !== $manifest ) {
-        return $manifest;
-    }
-
-    $path = get_template_directory() . '/assets/manifest.json';
-    $manifest = file_exists( $path ) ? json_decode( file_get_contents( $path ), true ) : array();
-
-    return is_array( $manifest ) ? $manifest : array();
-}
-
 function icybreeze_enqueue_assets() {
-    $manifest = icybreeze_manifest();
     $build_uri = icybreeze_asset_uri( 'assets/build/' );
     $build_dir = get_template_directory() . '/assets/build/';
 
-    $app_css = $manifest['resources/css/app.css']['file'] ?? '';
-    $vendor_css = $manifest['resources/js/app.js']['css'][0] ?? '';
+    $app_css = 'app-Dw0Wgvd3.css';
+    $vendor_css = 'app-Cy4NUfxW.css';
 
     if ( $vendor_css ) {
         wp_enqueue_style(
@@ -161,4 +147,3 @@ function icybreeze_meta_description() {
 
     return 'Professional aircon cleaning and recurring care plans for homes in Iligan City.';
 }
-
