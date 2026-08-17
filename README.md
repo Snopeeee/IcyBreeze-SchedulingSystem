@@ -36,6 +36,31 @@ npm run build
 C:\xampp\php\php.exe artisan serve --host=127.0.0.1 --port=8000
 ```
 
+## Run with Docker
+
+Docker packages Apache, PHP 8.3, Composer dependencies, production Vite assets, and the SQLite database into one reproducible local stack.
+
+```powershell
+docker compose up --build -d
+```
+
+Open `http://127.0.0.1:8080`. The first start creates a persistent application key and SQLite database, runs migrations, and loads the demo records. Data remains available across container restarts in named Docker volumes.
+
+Useful commands:
+
+```powershell
+docker compose logs -f app
+docker compose down
+docker compose down -v # Also removes the Docker database and generated app key.
+```
+
+Set another host port when `8080` is already in use:
+
+```powershell
+$env:APP_PORT=8081
+docker compose up --build -d
+```
+
 ## Test
 
 ```powershell

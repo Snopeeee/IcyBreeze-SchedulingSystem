@@ -1,0 +1,25 @@
+name: icybreeze
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "${APP_PORT:-8080}:80"
+    environment:
+      APP_ENV: local
+      APP_DEBUG: "true"
+      APP_URL: "http://localhost:${APP_PORT:-8080}"
+      RUN_SEEDER: "true"
+    init: true
+    restart: unless-stopped
+    volumes:
+      - icybreeze-database:/var/www/html/database
+      - icybreeze-storage:/var/www/html/storage
+      - icybreeze-runtime:/var/www/html/.docker-runtime
+
+volumes:
+  icybreeze-database:
+  icybreeze-storage:
+  icybreeze-runtime:
