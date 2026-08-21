@@ -7,7 +7,7 @@
 <section class="section subscription-form-section">
     <div class="site-shell subscription-form-layout">
         <div>
-            <div class="section-heading"><span class="eyebrow">Choose your rhythm</span><h2>Simple recurring care</h2><p>Your price is based on the service and number of units you choose. No automatic card charge is created in this MVP.</p></div>
+            <div class="section-heading"><span class="eyebrow">Choose your rhythm</span><h2>Simple recurring care</h2><p>Your price is based on the service and number of units you choose. Payment is collected after each completed visit.</p></div>
             <div class="plan-stack plan-stack-wide">
                 <article class="plan-card plan-card-featured"><span class="plan-kicker">Save 10% per visit</span><div class="plan-icon"><i class="ph ph-arrows-clockwise"></i></div><h3>Quarterly Care</h3><p>Four visits a year for daily-use units and households that want a dependable routine.</p></article>
                 <article class="plan-card"><span class="plan-kicker">Save 5% per visit</span><div class="plan-icon"><i class="ph ph-calendar-dots"></i></div><h3>Biannual Care</h3><p>Two visits a year for moderate-use rooms that need regular seasonal upkeep.</p></article>

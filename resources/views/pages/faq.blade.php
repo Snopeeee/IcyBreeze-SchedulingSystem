@@ -8,10 +8,10 @@
 ['How long does one appointment take?','A standard cleaning usually takes around 75 minutes per unit, while deep cleaning takes around two hours. Additional units add time to the appointment.'],
 ['What should I prepare before the technician arrives?','Please clear a comfortable work area below and around the aircon, secure pets, and make sure electricity and water are available.'],
 ['Can I cancel or change my booking?','Your private manage-booking link lets you review the appointment. Online cancellation is available until 24 hours before the visit; closer changes need a quick call.'],
-['How can I pay?','You may select cash after service. The online-payment choice in this MVP is a safe demo workflow and will require live PayMongo credentials before production use.'],
-['How do recurring care plans work?','Choose quarterly or biannual care, a preferred first date, and your usual service. The office confirms each upcoming visit and you pay per completed visit in this MVP.'],
+['How can I pay?','Payment is collected in cash after the completed service. The office records the payment status in the system for reconciliation.'],
+['How do recurring care plans work?','Choose quarterly or biannual care, a preferred first date, and your usual service. The office confirms each upcoming visit and you pay per completed visit.'],
 ['Why can I share my GPS location?','The location button is optional. If you consent, the precise pin is saved with the service address so only the office and assigned technician can find you and plan the route more accurately.'],
-['Do you repair aircon units?','This MVP focuses on cleaning. If the technician identifies a likely repair issue, it will be documented so you can arrange the appropriate repair service.']
+['Do you repair aircon units?','IcyBreeze focuses on cleaning. If the technician identifies a likely repair issue, it will be documented so you can arrange the appropriate repair service.']
 ] as [$question,$answer])
 <div class="faq-item" data-faq-item><button class="faq-button" type="button" data-faq-button aria-expanded="false"><span>{{ $question }}</span><i class="ph ph-plus"></i></button><div class="faq-answer"><p>{{ $answer }}</p></div></div>
 @endforeach

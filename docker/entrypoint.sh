@@ -14,8 +14,6 @@ mkdir -p \
     storage/logs \
     .docker-runtime
 
-touch database/database.sqlite
-
 if [ -z "${APP_KEY:-}" ]; then
     key_file=".docker-runtime/app_key"
 
@@ -28,7 +26,24 @@ if [ -z "${APP_KEY:-}" ]; then
     export APP_KEY
 fi
 
-chown -R www-data:www-data bootstrap/cache database storage .docker-runtime
+chown -R www-data:www-data bootstrap/cache storage .docker-runtime
+
+attempt=1
+until mysqladmin ping \
+    --host="${DB_HOST:-host.docker.internal}" \
+    --port="${DB_PORT:-3306}" \
+    --user="${DB_USERNAME:-icybreeze_app}" \
+    --password="${DB_PASSWORD:-}" \
+    --silent; do
+    if [ "$attempt" -ge 30 ]; then
+        echo "MySQL did not become ready after 30 attempts." >&2
+        exit 1
+    fi
+
+    echo "Waiting for MySQL (${attempt}/30)..."
+    attempt=$((attempt + 1))
+    sleep 2
+done
 
 php artisan migrate --force --no-interaction
 

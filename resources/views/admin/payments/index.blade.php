@@ -2,7 +2,7 @@
 @php($title = 'Payments')
 
 @section('content')
-<div class="admin-top"><div><h1>Payments</h1><p>Reconcile customer payments, technician shares, and gross income.</p></div><span class="admin-date"><i class="ph ph-info"></i> Online checkout is in demo mode</span></div>
+<div class="admin-top"><div><h1>Payments</h1><p>Reconcile customer payments, technician shares, and gross income.</p></div><span class="admin-date"><i class="ph ph-money"></i> Cash payments after service</span></div>
 <div class="admin-page-card"><div class="admin-table-wrap"><table class="admin-table">
     <thead><tr><th>Date</th><th>Booking / customer</th><th>Aircon</th><th>Method</th><th>Customer amount</th><th>Technician share</th><th>Gross</th><th>Status / update</th></tr></thead>
     <tbody>

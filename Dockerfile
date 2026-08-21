@@ -22,8 +22,11 @@ ENV APACHE_DOCUMENT_ROOT=/var/www/html/public \
     APP_URL=http://localhost:8080 \
     APP_TIMEZONE=Asia/Manila \
     LOG_CHANNEL=stderr \
-    DB_CONNECTION=sqlite \
-    DB_DATABASE=/var/www/html/database/database.sqlite \
+    DB_CONNECTION=mysql \
+    DB_HOST=host.docker.internal \
+    DB_PORT=3306 \
+    DB_DATABASE=icybreeze_scheduling \
+    DB_USERNAME=icybreeze_app \
     SESSION_DRIVER=database \
     CACHE_STORE=database \
     QUEUE_CONNECTION=database \
@@ -35,11 +38,12 @@ RUN apt-get update \
         libcurl4-openssl-dev \
         libicu-dev \
         libonig-dev \
+        default-mysql-client \
         libsqlite3-dev \
         libxml2-dev \
         libzip-dev \
         unzip \
-    && docker-php-ext-install -j"$(nproc)" curl dom intl mbstring opcache pdo_sqlite xml zip \
+    && docker-php-ext-install -j"$(nproc)" curl dom intl mbstring opcache pdo_mysql pdo_sqlite xml zip \
     && a2enmod expires headers rewrite \
     && rm -rf /var/lib/apt/lists/*
 

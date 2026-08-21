@@ -11,15 +11,21 @@ services:
       APP_ENV: "${DOCKER_APP_ENV:-production}"
       APP_DEBUG: "${DOCKER_APP_DEBUG:-false}"
       APP_URL: "http://localhost:${DOCKER_APP_PORT:-8080}"
+      DB_CONNECTION: mysql
+      DB_HOST: host.docker.internal
+      DB_PORT: "${DB_PORT:-3306}"
+      DB_DATABASE: "${DB_DATABASE:-icybreeze_scheduling}"
+      DB_USERNAME: "${DB_USERNAME:-icybreeze_app}"
+      DB_PASSWORD: "${DB_PASSWORD}"
       RUN_SEEDER: "true"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     init: true
     restart: unless-stopped
     volumes:
-      - icybreeze-database:/var/www/html/database
       - icybreeze-storage:/var/www/html/storage
       - icybreeze-runtime:/var/www/html/.docker-runtime
 
 volumes:
-  icybreeze-database:
   icybreeze-storage:
   icybreeze-runtime:

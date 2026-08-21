@@ -5,8 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Password;
 use Illuminate\View\View;
 
 class AdminTechnicianController extends Controller
@@ -27,7 +27,7 @@ class AdminTechnicianController extends Controller
             'name' => ['required', 'string', 'max:120'],
             'email' => ['required', 'email', 'max:160', 'unique:users,email'],
             'phone' => ['required', 'string', 'max:30'],
-            'password' => ['required', 'string', 'min:8'],
+            'password' => ['required', Password::min(12)->mixedCase()->numbers()->symbols()],
         ]);
         User::create($data + ['role' => 'technician', 'is_active' => true]);
 
@@ -41,7 +41,7 @@ class AdminTechnicianController extends Controller
             'name' => ['required', 'string', 'max:120'],
             'email' => ['required', 'email', 'max:160', Rule::unique('users', 'email')->ignore($technician)],
             'phone' => ['required', 'string', 'max:30'],
-            'password' => ['nullable', 'string', 'min:8'],
+            'password' => ['nullable', Password::min(12)->mixedCase()->numbers()->symbols()],
         ]);
         $data['is_active'] = $request->boolean('is_active');
         if (blank($data['password'] ?? null)) {
