@@ -2,6 +2,8 @@
 
 ## MVP Product and Technical Blueprint
 
+> Historical planning document (August 2026). The running system has since moved to Laravel 12 with XAMPP MySQL as the shared database for local PHP and Docker, cash-after-service payment reconciliation, subscriptions, technician mobile accounts, consent-based GPS tracking, and route optimization. WordPress, Vercel static export, SQLite production storage, sample records, and simulated PayMongo payments are not part of the active architecture. See `README.md` for current setup and operations.
+
 **Document status:** Proposed MVP, ready for business-rule confirmation  
 **Prepared:** August 17, 2026  
 **Product type:** Responsive customer website and secure admin web application  

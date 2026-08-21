@@ -53,7 +53,7 @@ class BookingController extends Controller
             'longitude' => ['nullable', 'numeric', 'between:-180,180', 'required_with:latitude'],
             'location_accuracy_meters' => ['nullable', 'numeric', 'min:0', 'max:10000'],
             'location_consent' => ['exclude_without:latitude', 'exclude_without:longitude', 'accepted'],
-            'payment_method' => ['required', Rule::in(['cash', 'online'])],
+            'payment_method' => ['required', Rule::in(['cash'])],
             'terms' => ['accepted'],
         ]);
 
@@ -90,9 +90,6 @@ class BookingController extends Controller
                 $reference = 'ICY-'.$startsAt->format('ymd').'-'.Str::upper(Str::random(4));
             } while (Appointment::where('reference', $reference)->exists());
 
-            $status = $data['payment_method'] === 'cash' ? 'confirmed' : 'pending_payment';
-            $paymentStatus = $data['payment_method'] === 'cash' ? 'unpaid' : 'pending';
-
             $appointment = Appointment::create([
                 'reference' => $reference,
                 'manage_token' => Str::random(48),
@@ -104,8 +101,8 @@ class BookingController extends Controller
                 'unit_price_centavos' => $unitType->price_centavos,
                 'starts_at' => $startsAt,
                 'ends_at' => $endsAt,
-                'status' => $status,
-                'payment_status' => $paymentStatus,
+                'status' => 'confirmed',
+                'payment_status' => 'unpaid',
                 'source' => 'web',
                 'subtotal_centavos' => $subtotal,
                 'travel_fee_centavos' => 0,
@@ -123,24 +120,24 @@ class BookingController extends Controller
                 'location_accuracy_meters' => $data['location_accuracy_meters'] ?? null,
                 'location_consent_at' => isset($data['latitude'], $data['longitude']) ? now() : null,
                 'customer_notes' => $data['customer_notes'] ?? null,
-                'confirmed_at' => $status === 'confirmed' ? now() : null,
+                'confirmed_at' => now(),
             ]);
 
             Payment::create([
                 'appointment_id' => $appointment->id,
-                'method' => $data['payment_method'],
-                'provider' => $data['payment_method'] === 'online' ? 'paymongo' : null,
-                'reference' => $data['payment_method'] === 'online' ? 'PM-DEMO-'.Str::upper(Str::random(10)) : null,
-                'status' => $paymentStatus,
+                'method' => 'cash',
+                'provider' => null,
+                'reference' => null,
+                'status' => 'unpaid',
                 'amount_centavos' => $subtotal,
                 'currency' => 'PHP',
-                'notes' => $data['payment_method'] === 'online' ? 'Demo checkout record. Add live PayMongo credentials before production.' : null,
+                'notes' => null,
             ]);
 
             AppointmentStatusHistory::create([
                 'appointment_id' => $appointment->id,
                 'from_status' => null,
-                'to_status' => $status,
+                'to_status' => 'confirmed',
                 'actor_type' => 'customer',
                 'actor_name' => $customer->full_name,
                 'reason' => 'Appointment booked through the website.',

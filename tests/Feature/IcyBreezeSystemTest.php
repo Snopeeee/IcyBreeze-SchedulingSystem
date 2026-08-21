@@ -54,6 +54,30 @@ class IcyBreezeSystemTest extends TestCase
         $this->assertDatabaseHas('customers', ['email' => 'mika@example.test']);
     }
 
+    public function test_simulated_online_payment_is_not_accepted(): void
+    {
+        $service = $this->service();
+        $data = $this->bookingData($service);
+        $data['payment_method'] = 'online';
+
+        $this->post('/book', $data)->assertSessionHasErrors('payment_method');
+        $this->assertDatabaseCount('appointments', 0);
+        $this->assertDatabaseCount('payments', 0);
+    }
+
+    public function test_production_seeder_creates_catalog_without_sample_records(): void
+    {
+        $this->seed();
+
+        $this->assertDatabaseHas('services', ['slug' => 'standard-clean', 'is_active' => true]);
+        $this->assertDatabaseHas('aircon_unit_types', ['slug' => 'split-type-inverter', 'price_centavos' => 100000]);
+        $this->assertDatabaseCount('users', 0);
+        $this->assertDatabaseCount('customers', 0);
+        $this->assertDatabaseCount('appointments', 0);
+        $this->assertDatabaseCount('payments', 0);
+        $this->assertDatabaseCount('subscriptions', 0);
+    }
+
     public function test_every_pdf_unit_type_uses_its_exact_price_split(): void
     {
         $service = $this->service();

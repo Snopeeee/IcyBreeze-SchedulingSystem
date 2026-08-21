@@ -17,17 +17,14 @@ class AdminAuthController extends Controller
     public function login(Request $request): RedirectResponse
     {
         $credentials = $request->validate(['email' => ['required', 'email'], 'password' => ['required', 'string']]);
+        $credentials['role'] = 'admin';
+        $credentials['is_active'] = true;
 
         if (! Auth::attempt($credentials, $request->boolean('remember'))) {
             return back()->withErrors(['email' => 'The email or password is incorrect.'])->onlyInput('email');
         }
 
         $request->session()->regenerate();
-        if (! $request->user()->isAdmin()) {
-            Auth::logout();
-            return back()->withErrors(['email' => 'This account cannot access the admin dashboard.']);
-        }
-
         return redirect()->intended(route('admin.dashboard'));
     }
 
