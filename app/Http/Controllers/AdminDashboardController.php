@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Appointment;
 use App\Models\Payment;
 use App\Models\Subscription;
-use App\Models\User;
 use Illuminate\View\View;
 
 class AdminDashboardController extends Controller
@@ -28,7 +27,7 @@ class AdminDashboardController extends Controller
         });
 
         $financialTrend = collect(range(5, 0))->map(function (int $monthsAgo): array {
-            $month = now()->subMonths($monthsAgo);
+            $month = now()->startOfMonth()->subMonths($monthsAgo);
             $start = $month->copy()->startOfMonth();
             $end = $month->copy()->endOfMonth();
             $paidAppointments = Appointment::whereHas('payments', fn ($query) => $query
@@ -55,9 +54,10 @@ class AdminDashboardController extends Controller
         return view('admin.dashboard', [
             'todayCount' => Appointment::whereDate('starts_at', today())->count(),
             'upcomingCount' => Appointment::whereIn('status', ['confirmed', 'assigned'])->where('starts_at', '>=', now())->count(),
-            'pendingCount' => Appointment::whereIn('status', ['pending_payment', 'pending_confirmation'])->count(),
-            'unpaidCount' => Appointment::whereIn('payment_status', ['unpaid', 'pending', 'failed'])->count(),
-            'revenue' => Payment::where('status', 'paid')->whereMonth('paid_at', now()->month)->sum('amount_centavos'),
+            'attentionCount' => Appointment::whereNotIn('status', ['cancelled', 'no_show'])
+                ->where(fn ($query) => $query->whereIn('status', ['pending_payment', 'pending_confirmation'])
+                    ->orWhereIn('payment_status', ['unpaid', 'pending', 'failed']))->count(),
+            'revenue' => Payment::where('status', 'paid')->whereYear('paid_at', now()->year)->whereMonth('paid_at', now()->month)->sum('amount_centavos'),
             'technicianPayout' => (clone $paidAppointmentsThisMonth)->sum('technician_share_centavos'),
             'gross' => (clone $paidAppointmentsThisMonth)->sum('gross_centavos'),
             'todayAppointments' => Appointment::with(['customer', 'service'])->whereDate('starts_at', today())->orderBy('starts_at')->get(),
@@ -66,9 +66,6 @@ class AdminDashboardController extends Controller
             'upcomingTrend' => $upcomingTrend,
             'financialTrend' => $financialTrend,
             'unitTypeMix' => $unitTypeMix,
-            'technicians' => User::where('role', 'technician')->with('technicianLocation')->withCount([
-                'technicianAppointments' => fn ($query) => $query->whereDate('starts_at', today()),
-            ])->orderBy('name')->get(),
         ]);
     }
 }

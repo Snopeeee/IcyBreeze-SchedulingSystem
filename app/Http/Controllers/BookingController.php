@@ -10,6 +10,7 @@ use App\Models\Payment;
 use App\Models\Service;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -18,14 +19,30 @@ use Illuminate\View\View;
 
 class BookingController extends Controller
 {
-    private const TIMES = ['08:00', '10:00', '13:00', '15:00'];
-
     public function create(Request $request): View
     {
+        $unitTypes = AirconUnitType::bookable()->get();
+        $date = old('appointment_date', today()->addDays(2)->format('Y-m-d'));
+        $quantity = (int) old('quantity', 1);
+
         return view('booking.create', [
             'service' => Service::bookable()->firstOrFail(),
-            'unitTypes' => AirconUnitType::bookable()->get(),
-            'times' => self::TIMES,
+            'unitTypes' => $unitTypes,
+            'selectedUnitTypeId' => $unitTypes->firstWhere('id', $request->integer('unit'))?->id ?? $unitTypes->first()?->id,
+            'availability' => $this->availabilityFor($date, $quantity),
+        ]);
+    }
+
+    public function availability(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'date' => ['required', 'date', 'after_or_equal:tomorrow'],
+            'quantity' => ['nullable', 'integer', 'min:1', 'max:5'],
+        ]);
+
+        return response()->json([
+            'date' => $data['date'],
+            'slots' => $this->availabilityFor($data['date'], (int) ($data['quantity'] ?? 1)),
         ]);
     }
 
@@ -38,7 +55,7 @@ class BookingController extends Controller
             ],
             'quantity' => ['required', 'integer', 'min:1', 'max:5'],
             'appointment_date' => ['required', 'date', 'after_or_equal:tomorrow'],
-            'appointment_time' => ['required', Rule::in(self::TIMES)],
+            'appointment_time' => ['required', Rule::in(config('scheduling.arrival_times'))],
             'first_name' => ['required', 'string', 'max:80'],
             'last_name' => ['required', 'string', 'max:80'],
             'email' => ['required', 'email', 'max:160'],
@@ -47,12 +64,8 @@ class BookingController extends Controller
             'barangay' => ['required', 'string', 'max:100'],
             'city' => ['required', Rule::in(['Iligan City'])],
             'postal_code' => ['nullable', 'string', 'max:10'],
-            'landmark' => ['nullable', 'string', 'max:160'],
+            'landmark' => ['required', 'string', 'min:3', 'max:160'],
             'customer_notes' => ['nullable', 'string', 'max:1000'],
-            'latitude' => ['nullable', 'numeric', 'between:-90,90', 'required_with:longitude'],
-            'longitude' => ['nullable', 'numeric', 'between:-180,180', 'required_with:latitude'],
-            'location_accuracy_meters' => ['nullable', 'numeric', 'min:0', 'max:10000'],
-            'location_consent' => ['exclude_without:latitude', 'exclude_without:longitude', 'accepted'],
             'payment_method' => ['required', Rule::in(['cash'])],
             'terms' => ['accepted'],
         ]);
@@ -114,11 +127,7 @@ class BookingController extends Controller
                 'city' => $data['city'],
                 'province' => 'Lanao del Norte',
                 'postal_code' => $data['postal_code'] ?? null,
-                'landmark' => $data['landmark'] ?? null,
-                'latitude' => $data['latitude'] ?? null,
-                'longitude' => $data['longitude'] ?? null,
-                'location_accuracy_meters' => $data['location_accuracy_meters'] ?? null,
-                'location_consent_at' => isset($data['latitude'], $data['longitude']) ? now() : null,
+                'landmark' => $data['landmark'],
                 'customer_notes' => $data['customer_notes'] ?? null,
                 'confirmed_at' => now(),
             ]);
@@ -197,5 +206,35 @@ class BookingController extends Controller
         ]);
 
         return back()->with('success', 'Your appointment has been cancelled.');
+    }
+
+    private function availabilityFor(string $date, int $quantity): array
+    {
+        $service = Service::bookable()->firstOrFail();
+        $duration = $service->duration_minutes + (($quantity - 1) * 45) + $service->buffer_minutes;
+        $dayStart = CarbonImmutable::createFromFormat('Y-m-d H:i', $date.' 00:00', config('app.timezone'));
+        $dayEnd = $dayStart->addDay();
+        $appointments = Appointment::query()
+            ->whereIn('status', Appointment::ACTIVE_STATUSES)
+            ->where('starts_at', '<', $dayEnd)
+            ->where('ends_at', '>', $dayStart)
+            ->orderBy('starts_at')
+            ->get(['starts_at', 'ends_at', 'status']);
+
+        return collect(config('scheduling.arrival_times'))->map(function (string $time) use ($date, $duration, $appointments) {
+            $startsAt = CarbonImmutable::createFromFormat('Y-m-d H:i', $date.' '.$time, config('app.timezone'));
+            $endsAt = $startsAt->addMinutes($duration);
+            $conflicts = $appointments->filter(fn (Appointment $appointment) => $appointment->starts_at->lt($endsAt) && $appointment->ends_at->gt($startsAt));
+            $status = $conflicts->isEmpty()
+                ? 'available'
+                : ($conflicts->contains(fn (Appointment $appointment) => $appointment->status === 'in_progress') ? 'in_progress' : 'reserved');
+
+            return [
+                'time' => $time,
+                'label' => $startsAt->format('g:i A'),
+                'status' => $status,
+                'status_label' => str($status)->replace('_', ' ')->title()->toString(),
+            ];
+        })->all();
     }
 }

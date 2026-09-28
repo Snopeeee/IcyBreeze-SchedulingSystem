@@ -13,9 +13,9 @@ class CatalogSeeder extends Seeder
         Service::where('slug', '!=', Service::STANDARD_SLUG)->update(['is_active' => false]);
 
         Service::updateOrCreate(['slug' => Service::STANDARD_SLUG], [
-            'name' => 'Standard Cleaning',
-            'short_description' => 'Professional standard cleaning priced by aircon unit type.',
-            'description' => 'One careful standard-cleaning service for window and split-type air conditioners, including cleaning, drainage inspection, and an operational cooling check.',
+            'name' => 'Aircon Cleaning',
+            'short_description' => 'Professional aircon cleaning priced by aircon unit type.',
+            'description' => 'Professional aircon cleaning for window and split-type air conditioners, including cleaning, drainage inspection, and an operational cooling check.',
             'price_centavos' => 70000,
             'duration_minutes' => 75,
             'buffer_minutes' => 30,

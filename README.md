@@ -1,6 +1,6 @@
 # IcyBreeze Scheduling System
 
-A Laravel 12 scheduling and operations system for IcyBreeze Aircon Cleaning in Iligan City. Laravel owns the public website, appointment and subscription records, administration, technician mobile accounts, GPS locations, routing data, and reporting. MySQL in XAMPP is the single database for both local PHP and Docker.
+A Laravel 12 scheduling and operations system for IcyBreeze Aircon Cleaning in Iligan City. Laravel owns the public website, appointment and subscription records, administration, and reporting. The only active areas are the public customer website and the secure admin dashboard. MySQL in XAMPP is the single database for both local PHP and Docker.
 
 ## Included features
 
@@ -9,8 +9,7 @@ A Laravel 12 scheduling and operations system for IcyBreeze Aircon Cleaning in I
 - Private booking management links and a 24-hour online cancellation policy
 - Quarterly and biannual care-plan requests
 - Cash-after-service payment records and admin reconciliation
-- Admin dashboard, graphs, appointments, customers, services, payments, subscriptions, and technician management
-- Technician mobile accounts, assigned jobs, consent-based GPS updates, and route ordering
+- Admin dashboard, graphs, appointments, customers, services, payments, and subscriptions
 - MySQL persistence with no sample customers, appointments, payments, or default passwords
 
 ## One-time XAMPP MySQL setup
@@ -45,9 +44,13 @@ The production seeder is safe to run repeatedly: it creates only the real servic
 C:\xampp\php\php.exe artisan app:create-admin admin@your-domain.com
 ```
 
-The command securely prompts for a strong password. Technicians are then created from **Admin → Technicians**.
+The command securely prompts for a strong password. Customers use the public booking and care-plan forms; their private links show their own booking details.
 
 ## Run locally with XAMPP MySQL
+
+With XAMPP Apache and MySQL running, open `http://localhost/SchedulingSystem/public/`. The admin area is at `/SchedulingSystem/public/admin`. Laravel's `public` folder is the web entry point; do not expose the application root as a website.
+
+Alternatively, use Laravel's local development server:
 
 ```powershell
 npm install
@@ -57,7 +60,6 @@ C:\xampp\php\php.exe artisan serve --host=127.0.0.1 --port=8000
 
 - Website: `http://127.0.0.1:8000`
 - Admin: `http://127.0.0.1:8000/admin`
-- Technician: `http://127.0.0.1:8000/technician`
 
 ## Run the Laravel application in Docker
 
@@ -80,6 +82,18 @@ docker compose down
 ```
 
 Do not use `docker compose down -v` unless you intentionally want to delete Docker-managed application storage and the generated container application key. MySQL data remains managed by XAMPP.
+
+## Retired technician module
+
+Technician logins, account management, job assignment, GPS collection, and route optimization are no longer available. Existing migrations and historical database fields remain for data preservation; no customer, booking, payment, or subscription records are deleted. Older assigned appointments are treated as confirmed and continue to block overlapping bookings. The existing price catalog and financial splits remain unchanged.
+
+## Brand typography
+
+League Spartan Bold (700) is used for headings and display figures. Poppins Regular (400) and SemiBold (600) are used for body text and controls. Fonts are bundled locally through Vite; no external font service is required. The current color palette is unchanged.
+
+## Business profile
+
+The public site reads the official contact, location, social, and operating-hour details from `config/business.php`. The defaults match the IcyBreeze Facebook profile: Tambacan, Iligan City; 0967 873 0654; icybreezeaccleaning@gmail.com; Facebook `icybreezeac`; and Instagram `@icybreezeph`. Each value can be changed later through the corresponding `BUSINESS_*` environment variable without editing page templates.
 
 ## Payments
 

@@ -3,8 +3,8 @@
 
 @section('content')
 <div class="admin-top">
-    <div><h1>Standard Cleaning</h1><p>Manage the one cleaning service and its aircon unit pricing.</p></div>
-    <span class="admin-date"><i class="ph ph-check-circle"></i> Standard Cleaning only</span>
+    <div><h1>Aircon Cleaning</h1><p>Manage cleaning details, appointment duration, and prices for each unit type.</p></div>
+    <span class="admin-date"><i class="ph ph-check-circle"></i> Unit-based pricing</span>
 </div>
 
 @if($errors->any())
@@ -16,7 +16,7 @@
         @csrf
         @method('PATCH')
         <div class="field-grid">
-            <div><label>Service name</label><input value="Standard Cleaning" disabled></div>
+            <div><label>Service name</label><input value="Aircon Cleaning" disabled></div>
             <div><label>Availability</label><input value="Window and split-type units" disabled></div>
         </div>
         <div><label for="short_description">Short description</label><input id="short_description" name="short_description" value="{{ old('short_description', $service->short_description) }}" required></div>
@@ -26,19 +26,19 @@
             <div><label for="buffer_minutes">Schedule buffer (minutes)</label><input id="buffer_minutes" type="number" min="0" max="180" name="buffer_minutes" value="{{ old('buffer_minutes', $service->buffer_minutes) }}" required></div>
         </div>
 
-        <div class="admin-rate-heading"><div><h2>Regular price list</h2><p>Gross is calculated as customer price minus technician share.</p></div></div>
+        <div class="admin-rate-heading"><div><h2>Regular price list</h2><p>Net income is calculated as customer price minus the configured service cost.</p></div></div>
         <div class="admin-table-wrap">
             <table class="admin-table rate-admin-table">
-                <thead><tr><th>Aircon unit type</th><th>Customer price</th><th>Technician share</th><th>Gross</th></tr></thead>
+                <thead><tr><th>Aircon unit type</th><th>Customer price</th><th>Service cost</th><th>Net</th></tr></thead>
                 <tbody>
                     @foreach($unitTypes as $unitType)
                         @php($price = old("rates.{$unitType->id}.price", $unitType->price_centavos / 100))
                         @php($share = old("rates.{$unitType->id}.technician_share", $unitType->technician_share_centavos / 100))
                         <tr>
-                            <td><strong>{{ $unitType->name }}</strong><span>Standard Cleaning</span></td>
-                            <td><div class="money-input"><span>₱</span><input type="number" min="1" step=".01" name="rates[{{ $unitType->id }}][price]" value="{{ $price }}" required></div></td>
-                            <td><div class="money-input"><span>₱</span><input type="number" min="0" step=".01" name="rates[{{ $unitType->id }}][technician_share]" value="{{ $share }}" required></div></td>
-                            <td><strong>{{ $unitType->formatted_gross }}</strong><span>Current configured gross</span></td>
+                            <td><strong>{{ $unitType->name }}</strong><span>Aircon Cleaning</span></td>
+                            <td><div class="money-input"><span>₱</span><input aria-label="{{ $unitType->name }} customer price" type="number" min="1" step=".01" name="rates[{{ $unitType->id }}][price]" value="{{ $price }}" required></div></td>
+                            <td><div class="money-input"><span>₱</span><input aria-label="{{ $unitType->name }} service cost" type="number" min="0" step=".01" name="rates[{{ $unitType->id }}][technician_share]" value="{{ $share }}" required></div></td>
+                            <td><strong>{{ $unitType->formatted_gross }}</strong><span>Current configured net</span></td>
                         </tr>
                     @endforeach
                 </tbody>

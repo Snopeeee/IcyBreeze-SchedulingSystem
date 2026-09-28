@@ -51,6 +51,21 @@ if [ "${RUN_SEEDER:-true}" = "true" ]; then
     php artisan db:seed --force --no-interaction
 fi
 
+if [ -n "${ADMIN_EMAIL:-}" ] && [ -n "${ADMIN_PASSWORD:-}" ]; then
+    if [ -n "${ADMIN_PHONE:-}" ]; then
+        php artisan app:create-admin \
+            "$ADMIN_EMAIL" \
+            "--name=${ADMIN_NAME:-IcyBreeze Administrator}" \
+            "--phone=$ADMIN_PHONE" \
+            "--password=$ADMIN_PASSWORD"
+    else
+        php artisan app:create-admin \
+            "$ADMIN_EMAIL" \
+            "--name=${ADMIN_NAME:-IcyBreeze Administrator}" \
+            "--password=$ADMIN_PASSWORD"
+    fi
+fi
+
 php artisan config:cache --no-interaction
 php artisan view:cache --no-interaction
 

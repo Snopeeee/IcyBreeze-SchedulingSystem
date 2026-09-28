@@ -1,12 +1,6 @@
 import './bootstrap';
 import '@phosphor-icons/web/regular';
 import '@phosphor-icons/web/fill';
-import '@fontsource/poppins/400.css';
-import '@fontsource/poppins/500.css';
-import '@fontsource/poppins/600.css';
-import '@fontsource/poppins/700.css';
-import '@fontsource/league-spartan/600.css';
-import '@fontsource/league-spartan/700.css';
 
 const money = new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP', maximumFractionDigits: 0 });
 
@@ -18,6 +12,8 @@ document.querySelector('[data-menu-toggle]')?.addEventListener('click', (event) 
     menu?.classList.toggle('is-open', !open);
     button.querySelector('i')?.classList.toggle('ph-list', open);
     button.querySelector('i')?.classList.toggle('ph-x', !open);
+    const accessibleLabel = button.querySelector('.sr-only');
+    if (accessibleLabel) accessibleLabel.textContent = open ? 'Open menu' : 'Close menu';
 });
 
 document.querySelectorAll('[data-faq-button]').forEach((button) => {
@@ -29,22 +25,121 @@ document.querySelectorAll('[data-faq-button]').forEach((button) => {
     });
 });
 
+const reviewCarousel = document.querySelector('[data-review-carousel]');
+if (reviewCarousel) {
+    const track = reviewCarousel.querySelector('[data-review-track]');
+    const slides = [...reviewCarousel.querySelectorAll('[data-review-slide]')];
+    const dots = [...reviewCarousel.querySelectorAll('[data-review-dot]')];
+    const previousButton = reviewCarousel.querySelector('[data-review-previous]');
+    const nextButton = reviewCarousel.querySelector('[data-review-next]');
+    const autoplayButton = reviewCarousel.querySelector('[data-review-autoplay]');
+    const status = reviewCarousel.querySelector('[data-review-status]');
+    const announcement = reviewCarousel.querySelector('[data-review-announcement]');
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const interval = Number(reviewCarousel.dataset.autoplayInterval || 6500);
+    let activeIndex = 0;
+    let timer;
+    let interactionPaused = false;
+    let userPaused = reducedMotion.matches;
+
+    const stopRotation = () => {
+        window.clearInterval(timer);
+        timer = undefined;
+    };
+
+    const updateAutoplayButton = () => {
+        if (!autoplayButton) return;
+        const icon = autoplayButton.querySelector('i');
+        autoplayButton.setAttribute('aria-pressed', String(userPaused));
+        autoplayButton.setAttribute('aria-label', userPaused ? 'Start automatic rotation' : 'Pause automatic rotation');
+        if (icon) icon.className = userPaused ? 'ph ph-play' : 'ph ph-pause';
+    };
+
+    const startRotation = () => {
+        stopRotation();
+        if (userPaused || interactionPaused || document.hidden || slides.length < 2) return;
+        timer = window.setInterval(() => showSlide(activeIndex + 1), interval);
+    };
+
+    const showSlide = (requestedIndex, announce = false) => {
+        activeIndex = (requestedIndex + slides.length) % slides.length;
+        if (track) track.style.transform = `translate3d(-${activeIndex * 100}%, 0, 0)`;
+
+        slides.forEach((slide, index) => {
+            const isActive = index === activeIndex;
+            slide.classList.toggle('is-active', isActive);
+            slide.setAttribute('aria-hidden', String(!isActive));
+        });
+
+        dots.forEach((dot, index) => {
+            const isActive = index === activeIndex;
+            dot.classList.toggle('is-active', isActive);
+            dot.setAttribute('aria-current', String(isActive));
+        });
+
+        if (status) status.textContent = `${activeIndex + 1} of ${slides.length}`;
+        if (announce && announcement) {
+            const reviewer = slides[activeIndex]?.dataset.reviewer || 'customer';
+            announcement.textContent = `Showing recommendation ${activeIndex + 1} of ${slides.length} from ${reviewer}.`;
+        }
+        startRotation();
+    };
+
+    previousButton?.addEventListener('click', () => showSlide(activeIndex - 1, true));
+    nextButton?.addEventListener('click', () => showSlide(activeIndex + 1, true));
+    dots.forEach((dot) => dot.addEventListener('click', () => showSlide(Number(dot.dataset.slideIndex), true)));
+
+    autoplayButton?.addEventListener('click', () => {
+        userPaused = !userPaused;
+        updateAutoplayButton();
+        startRotation();
+    });
+
+    reviewCarousel.addEventListener('mouseenter', () => {
+        interactionPaused = true;
+        stopRotation();
+    });
+    reviewCarousel.addEventListener('mouseleave', () => {
+        interactionPaused = false;
+        startRotation();
+    });
+    reviewCarousel.addEventListener('focusin', () => {
+        interactionPaused = true;
+        stopRotation();
+    });
+    reviewCarousel.addEventListener('focusout', (event) => {
+        if (reviewCarousel.contains(event.relatedTarget)) return;
+        interactionPaused = false;
+        startRotation();
+    });
+    document.addEventListener('visibilitychange', startRotation);
+
+    updateAutoplayButton();
+    showSlide(0);
+}
+
 const wizard = document.querySelector('[data-booking-wizard]');
 if (wizard) {
     const steps = [...wizard.querySelectorAll('[data-step]')];
     const progressItems = [...document.querySelectorAll('[data-progress-step]')];
+    const availabilityRegion = wizard.querySelector('[data-availability-region]');
+    const availabilityMessage = wizard.querySelector('[data-availability-message]');
     let current = Number(wizard.dataset.initialStep || 1);
+    let availabilityRequest;
 
     const fieldsForStep = (step) => [...step.querySelectorAll('input, select, textarea')].filter((field) => field.type !== 'hidden');
-    const displayStep = (number) => {
+    const displayStep = (number, shouldScroll = true) => {
         current = number;
         steps.forEach((step) => step.classList.toggle('is-active', Number(step.dataset.step) === number));
         progressItems.forEach((item) => {
             const itemNumber = Number(item.dataset.progressStep);
             item.classList.toggle('is-active', itemNumber === number);
             item.classList.toggle('is-complete', itemNumber < number);
+            if (itemNumber === number) item.setAttribute('aria-current', 'step');
+            else item.removeAttribute('aria-current');
         });
-        document.querySelector('[data-booking-top]')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        if (number === 2 && shouldScroll) refreshAvailability();
+        if (shouldScroll) document.querySelector('[data-booking-top]')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     };
 
     const validateStep = () => {
@@ -64,6 +159,23 @@ if (wizard) {
     }));
     wizard.querySelectorAll('[data-back]').forEach((button) => button.addEventListener('click', () => displayStep(Math.max(1, current - 1))));
 
+    // Enter advances the current step, never submits an incomplete wizard.
+    wizard.noValidate = true;
+    wizard.addEventListener('submit', (event) => {
+        event.preventDefault();
+        if (!validateStep()) return;
+        if (current < 4) return displayStep(current + 1);
+        const invalidStep = steps.find((step) => fieldsForStep(step).some((field) => !field.checkValidity()));
+        if (invalidStep) {
+            displayStep(Number(invalidStep.dataset.step));
+            return validateStep();
+        }
+        const button = wizard.querySelector('[data-confirm-submit]');
+        button.disabled = true;
+        button.innerHTML = '<i class="ph ph-circle-notch spin"></i> Confirming appointment…';
+        wizard.submit();
+    });
+
     const updateSummary = () => {
         const unitType = wizard.querySelector('input[name="aircon_unit_type_id"]:checked');
         const quantity = Number(wizard.querySelector('[name="quantity"]')?.value || 1);
@@ -75,63 +187,70 @@ if (wizard) {
         document.querySelectorAll('[data-summary-quantity]').forEach((el) => el.textContent = `${quantity} ${quantity === 1 ? 'unit' : 'units'} · ${unit}`);
         document.querySelectorAll('[data-summary-price]').forEach((el) => el.textContent = total ? money.format(total / 100) : '—');
         document.querySelectorAll('[data-summary-schedule]').forEach((el) => {
-            if (!dateValue || !timeValue) return el.textContent = 'Choose your schedule';
+            if (!dateValue || !timeValue) return el.textContent = 'Select an appointment schedule';
             const date = new Date(`${dateValue}T${timeValue}:00`);
             el.textContent = date.toLocaleString('en-PH', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' });
         });
     };
 
-    wizard.querySelectorAll('input, select').forEach((field) => field.addEventListener('change', updateSummary));
-    updateSummary();
-    displayStep(current);
-}
+    const applyAvailability = (slots) => {
+        slots.forEach((slot) => {
+            const option = wizard.querySelector(`[data-time-option][data-time="${slot.time}"]`);
+            if (!option) return;
+            const input = option.querySelector('input');
+            const status = option.querySelector('[data-slot-status]');
+            const icon = option.querySelector('.time-status-icon i');
+            option.classList.remove('is-available', 'is-reserved', 'is-in_progress');
+            option.classList.add(`is-${slot.status}`);
+            input.disabled = slot.status !== 'available';
+            if (input.disabled) input.checked = false;
+            status.textContent = slot.status_label;
+            icon.className = slot.status === 'available' ? 'ph ph-check' : (slot.status === 'in_progress' ? 'ph ph-clock-countdown' : 'ph ph-prohibit');
+        });
 
-document.querySelector('[data-confirm-submit]')?.addEventListener('click', (event) => {
-    const form = event.currentTarget.closest('form');
-    if (form?.checkValidity()) {
-        event.currentTarget.disabled = true;
-        event.currentTarget.innerHTML = '<i class="ph ph-circle-notch spin"></i> Creating booking…';
-        form.submit();
-    } else {
-        form?.reportValidity();
-    }
-});
-
-document.querySelectorAll('[data-geolocate]').forEach((button) => {
-    button.addEventListener('click', () => {
-        const container = button.closest('[data-location-fields]');
-        const status = container?.querySelector('[data-location-status]');
-
-        if (!container || !navigator.geolocation) {
-            if (status) status.textContent = 'Location is not available in this browser.';
-            return;
+        if (!wizard.querySelector('input[name="appointment_time"]:checked')) {
+            const firstAvailable = wizard.querySelector('input[name="appointment_time"]:not(:disabled)');
+            if (firstAvailable) firstAvailable.checked = true;
         }
+        updateSummary();
+    };
 
-        button.disabled = true;
-        button.innerHTML = '<i class="ph ph-circle-notch spin"></i> Finding location';
-        if (status) status.textContent = 'Waiting for your location permission...';
+    const refreshAvailability = async () => {
+        const date = wizard.querySelector('[name="appointment_date"]')?.value;
+        const quantity = wizard.querySelector('[name="quantity"]')?.value || 1;
+        if (!date || !wizard.dataset.availabilityUrl || !availabilityRegion) return;
 
-        navigator.geolocation.getCurrentPosition((position) => {
-            container.querySelector('[data-latitude]').value = position.coords.latitude.toFixed(7);
-            container.querySelector('[data-longitude]').value = position.coords.longitude.toFixed(7);
-            const accuracyField = container.querySelector('[data-accuracy]');
-            if (accuracyField) accuracyField.value = Math.round(position.coords.accuracy);
-            container.querySelector('[data-location-consent]').value = '1';
-            if (status) status.textContent = `Location ready (accurate to about ${Math.round(position.coords.accuracy)} m).`;
-            button.disabled = false;
-            button.innerHTML = '<i class="ph ph-check-circle"></i> Location added';
-        }, (error) => {
-            const messages = {
-                1: 'Location permission was not granted. You can still enter the address.',
-                2: 'Your location could not be found. Please try again or use the address.',
-                3: 'Location request timed out. Please try again.',
-            };
-            if (status) status.textContent = messages[error.code] || 'Location could not be added.';
-            button.disabled = false;
-            button.innerHTML = '<i class="ph ph-map-pin"></i> Try location again';
-        }, { enableHighAccuracy: true, timeout: 12000, maximumAge: 60000 });
-    });
-});
+        availabilityRequest?.abort();
+        availabilityRequest = new AbortController();
+        availabilityRegion.setAttribute('aria-busy', 'true');
+        availabilityRegion.classList.add('is-loading');
+        if (availabilityMessage) availabilityMessage.textContent = 'Checking the latest schedule…';
+
+        try {
+            const url = new URL(wizard.dataset.availabilityUrl, window.location.origin);
+            url.searchParams.set('date', date);
+            url.searchParams.set('quantity', quantity);
+            const response = await fetch(url, { headers: { Accept: 'application/json' }, signal: availabilityRequest.signal });
+            if (!response.ok) throw new Error('Availability could not be loaded.');
+            const payload = await response.json();
+            applyAvailability(payload.slots || []);
+            if (availabilityMessage) availabilityMessage.textContent = 'Live availability updated just now.';
+        } catch (error) {
+            if (error.name !== 'AbortError' && availabilityMessage) {
+                availabilityMessage.textContent = 'We could not refresh the schedule. Your selection will still be checked before confirmation.';
+            }
+        } finally {
+            availabilityRegion.setAttribute('aria-busy', 'false');
+            availabilityRegion.classList.remove('is-loading');
+        }
+    };
+
+    wizard.querySelectorAll('input, select').forEach((field) => field.addEventListener('change', updateSummary));
+    wizard.querySelector('[name="appointment_date"]')?.addEventListener('change', refreshAvailability);
+    wizard.querySelector('[name="quantity"]')?.addEventListener('change', refreshAvailability);
+    updateSummary();
+    displayStep(current, false);
+}
 
 const subscriptionForm = document.querySelector('[data-subscription-form]');
 if (subscriptionForm) {
@@ -144,92 +263,13 @@ if (subscriptionForm) {
         const total = Math.round(price * quantity * discount);
         const output = subscriptionForm.querySelector('[data-subscription-price]');
         if (output) output.textContent = total ? money.format(total / 100) : '—';
+        subscriptionForm.querySelector('[data-plan-name]').textContent = plan?.dataset.label || 'Choose a plan';
+        subscriptionForm.querySelector('[data-plan-frequency]').textContent = plan?.dataset.frequency || '';
+        subscriptionForm.querySelector('[data-plan-units]').textContent = `${quantity} ${quantity === 1 ? 'unit' : 'units'} · ${unitType?.dataset.name || ''}`;
     };
 
     subscriptionForm.querySelectorAll('[name="aircon_unit_type_id"], [name="quantity"], [name="plan"]').forEach((field) => {
         field.addEventListener('change', updateSubscriptionEstimate);
     });
     updateSubscriptionEstimate();
-}
-
-const technicianTools = document.querySelector('[data-tech-tools]');
-if (technicianTools) {
-    const shareButton = technicianTools.querySelector('[data-tech-location]');
-    const routeButton = technicianTools.querySelector('[data-route-optimize]');
-    const status = technicianTools.querySelector('[data-tech-location-status]');
-    const csrf = document.querySelector('meta[name="csrf-token"]')?.content;
-    let watchId = null;
-    let lastSentAt = 0;
-
-    const saveTechnicianLocation = async (position) => {
-        const now = Date.now();
-        if (now - lastSentAt < 30000) return;
-        lastSentAt = now;
-
-        try {
-            const response = await fetch(technicianTools.dataset.locationUrl, {
-                method: 'POST',
-                credentials: 'same-origin',
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': csrf,
-                },
-                body: JSON.stringify({
-                    latitude: position.coords.latitude,
-                    longitude: position.coords.longitude,
-                    accuracy_meters: position.coords.accuracy,
-                }),
-            });
-
-            if (!response.ok) throw new Error('Location update failed.');
-            if (status) status.textContent = `Live location updated just now (about ${Math.round(position.coords.accuracy)} m accuracy).`;
-        } catch {
-            if (status) status.textContent = 'We could not update the office. Check your connection and try again.';
-        }
-    };
-
-    shareButton?.addEventListener('click', () => {
-        if (!navigator.geolocation) {
-            if (status) status.textContent = 'Location is not available in this browser.';
-            return;
-        }
-
-        if (watchId !== null) {
-            navigator.geolocation.clearWatch(watchId);
-            watchId = null;
-            shareButton.innerHTML = '<i class="ph ph-crosshair"></i> Share live location';
-            if (status) status.textContent = 'Location sharing is off.';
-            return;
-        }
-
-        if (status) status.textContent = 'Waiting for location permission...';
-        watchId = navigator.geolocation.watchPosition(saveTechnicianLocation, () => {
-            if (status) status.textContent = 'Location permission is needed to share field position.';
-            if (watchId !== null) navigator.geolocation.clearWatch(watchId);
-            watchId = null;
-            shareButton.innerHTML = '<i class="ph ph-crosshair"></i> Share live location';
-        }, { enableHighAccuracy: true, timeout: 15000, maximumAge: 15000 });
-        shareButton.innerHTML = '<i class="ph ph-stop-circle"></i> Stop sharing';
-    });
-
-    routeButton?.addEventListener('click', () => {
-        if (!navigator.geolocation) {
-            if (status) status.textContent = 'Location is not available in this browser.';
-            return;
-        }
-
-        routeButton.disabled = true;
-        routeButton.innerHTML = '<i class="ph ph-circle-notch spin"></i> Optimizing';
-        navigator.geolocation.getCurrentPosition((position) => {
-            const url = new URL(technicianTools.dataset.dashboardUrl, window.location.origin);
-            url.searchParams.set('lat', position.coords.latitude);
-            url.searchParams.set('lng', position.coords.longitude);
-            window.location.assign(url);
-        }, () => {
-            if (status) status.textContent = 'We could not read your current position. Try sharing your location first.';
-            routeButton.disabled = false;
-            routeButton.innerHTML = '<i class="ph ph-path"></i> Optimize from here';
-        }, { enableHighAccuracy: true, timeout: 12000, maximumAge: 60000 });
-    });
 }

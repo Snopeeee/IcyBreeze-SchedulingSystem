@@ -6,26 +6,29 @@
 @section('content')
 <div class="admin-top admin-top-branded">
     <div>
-        <span class="admin-eyebrow"><i class="ph-fill ph-snowflake"></i> IcyBreeze command center</span>
-        <h1>Good morning, {{ Str::before(auth()->user()->name, ' ') }}.</h1>
-        <p>Keep appointments, field teams, and business performance moving smoothly.</p>
+        <span class="admin-eyebrow"><i class="ph-fill ph-snowflake"></i> Business operations</span>
+        <h1>Operations Dashboard</h1>
+        <p>Monitor customer appointments, maintenance plans, payments, and business performance.</p>
     </div>
     <span class="admin-date"><i class="ph ph-calendar-blank"></i>{{ now()->format('l, F j, Y') }}</span>
 </div>
 
 <div class="metric-grid">
     <div class="metric-card metric-card-cyan"><div class="metric-head"><span>Today's appointments</span><i class="ph ph-calendar-check"></i></div><div class="metric-value">{{ $todayCount }}</div><div class="metric-note">Scheduled for today</div></div>
-    <div class="metric-card"><div class="metric-head"><span>Upcoming confirmed</span><i class="ph ph-check-circle"></i></div><div class="metric-value">{{ $upcomingCount }}</div><div class="metric-note">Ready or assigned</div></div>
-    <div class="metric-card metric-card-sun"><div class="metric-head"><span>Needs attention</span><i class="ph ph-bell-ringing"></i></div><div class="metric-value">{{ $pendingCount + $unpaidCount }}</div><div class="metric-note">Pending or unpaid items</div></div>
-    <div class="metric-card"><div class="metric-head"><span>Paid this month</span><i class="ph ph-wallet"></i></div><div class="metric-value">{{ "\u{20B1}".number_format($revenue / 100) }}</div><div class="metric-note">Recorded payments</div></div>
-    <div class="metric-card"><div class="metric-head"><span>Technician shares</span><i class="ph ph-user-circle-gear"></i></div><div class="metric-value">{{ "\u{20B1}".number_format($technicianPayout / 100) }}</div><div class="metric-note">Paid jobs this month</div></div>
-    <div class="metric-card metric-card-navy"><div class="metric-head"><span>Gross</span><i class="ph ph-chart-line-up"></i></div><div class="metric-value">{{ "\u{20B1}".number_format($gross / 100) }}</div><div class="metric-note">After technician shares</div></div>
-    <div class="metric-card"><div class="metric-head"><span>Care plans</span><i class="ph ph-arrows-clockwise"></i></div><div class="metric-value">{{ $subscriptionCount }}</div><div class="metric-note">Pending or active</div></div>
+    <div class="metric-card"><div class="metric-head"><span>Confirmed appointments</span><i class="ph ph-check-circle"></i></div><div class="metric-value">{{ $upcomingCount }}</div><div class="metric-note">Upcoming service appointments</div></div>
+    <div class="metric-card metric-card-sun"><div class="metric-head"><span>Requires attention</span><i class="ph ph-bell-ringing"></i></div><div class="metric-value">{{ $attentionCount }}</div><div class="metric-note">Pending or unpaid appointments</div></div>
+    <div class="metric-card"><div class="metric-head"><span>Maintenance plans</span><i class="ph ph-arrows-clockwise"></i></div><div class="metric-value">{{ $subscriptionCount }}</div><div class="metric-note">Pending or active plans</div></div>
 </div>
 
 <div class="dashboard-section-heading">
-    <div><span class="admin-eyebrow">Performance overview</span><h2>Business at a glance</h2></div>
+    <div><span class="admin-eyebrow">Performance overview</span><h2>Business Performance</h2></div>
     <span>Live from appointments and recorded payments</span>
+</div>
+
+<div class="metric-grid metric-grid-finance">
+    <div class="metric-card"><div class="metric-head"><span>Monthly paid revenue</span><i class="ph ph-wallet"></i></div><div class="metric-value">{{ "\u{20B1}".number_format($revenue / 100) }}</div><div class="metric-note">Recorded customer payments</div></div>
+    <div class="metric-card"><div class="metric-head"><span>Service costs</span><i class="ph ph-receipt"></i></div><div class="metric-value">{{ "\u{20B1}".number_format($technicianPayout / 100) }}</div><div class="metric-note">Configured cost allocation on paid jobs</div></div>
+    <div class="metric-card metric-card-navy"><div class="metric-head"><span>Net before overhead</span><i class="ph ph-chart-line-up"></i></div><div class="metric-value">{{ "\u{20B1}".number_format($gross / 100) }}</div><div class="metric-note">Revenue after configured service costs</div></div>
 </div>
 
 @php
@@ -37,10 +40,10 @@
 <div class="dashboard-insights">
     <section class="admin-card dashboard-chart-card dashboard-chart-card-wide">
         <div class="admin-card-header chart-card-header">
-            <div><span class="chart-kicker">Last six months</span><h2>Revenue and gross trend</h2></div>
-            <div class="chart-legend"><span><i class="legend-revenue"></i>Revenue</span><span><i class="legend-gross"></i>Gross</span></div>
+            <div><span class="chart-kicker">Last six months</span><h2>Revenue and net trend</h2></div>
+            <div class="chart-legend"><span><i class="legend-revenue"></i>Revenue</span><span><i class="legend-gross"></i>Net</span></div>
         </div>
-        <div class="finance-chart" role="img" aria-label="Six month comparison of paid revenue and gross after technician shares">
+        <div class="finance-chart" role="img" aria-label="Six month comparison of paid revenue and net income after configured service costs">
             @foreach($financialTrend as $month)
                 @php
                     $revenueHeight = $month['revenue'] > 0 ? max(6, round($month['revenue'] / $maxFinance * 100)) : 2;
@@ -57,7 +60,7 @@
         </div>
         <div class="chart-summary-row">
             <span><small>This month revenue</small><strong>{{ "\u{20B1}".number_format($financialTrend->last()['revenue'] / 100) }}</strong></span>
-            <span><small>This month gross</small><strong>{{ "\u{20B1}".number_format($financialTrend->last()['gross'] / 100) }}</strong></span>
+            <span><small>This month net</small><strong>{{ "\u{20B1}".number_format($financialTrend->last()['gross'] / 100) }}</strong></span>
         </div>
     </section>
 
@@ -103,7 +106,7 @@
     </section>
 
     <section class="admin-card">
-        <div class="admin-card-header"><h2>Recently booked</h2></div>
+        <div class="admin-card-header"><h2>Recent appointments</h2></div>
         @forelse($recentAppointments as $appointment)
             <a class="recent-appointment" href="{{ route('admin.appointments.show', $appointment) }}"><span><strong>{{ $appointment->customer->full_name }}</strong><small>{{ $appointment->service->name }} &middot; {{ $appointment->starts_at->format('M j') }}</small></span><span class="status-badge status-{{ $appointment->status }}">{{ $appointment->status_label }}</span></a>
         @empty
@@ -112,14 +115,4 @@
     </section>
 </div>
 
-<section class="admin-card admin-field-status">
-    <div class="admin-card-header"><h2>Technician field status</h2><a class="text-link" href="{{ route('admin.technicians.index') }}">Manage accounts <i class="ph ph-arrow-right"></i></a></div>
-    <div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Technician</th><th>Jobs today</th><th>Last GPS update</th><th>Location</th></tr></thead><tbody>
-        @forelse($technicians as $technician)
-            <tr><td><strong>{{ $technician->name }}</strong>{{ $technician->phone }}</td><td><strong>{{ $technician->technician_appointments_count }}</strong>assigned</td><td>@if($technician->technicianLocation)<strong>{{ $technician->technicianLocation->recorded_at->diffForHumans() }}</strong>accuracy {{ round($technician->technicianLocation->accuracy_meters ?? 0) }} m @else<span class="status-badge status-unpaid">Not shared</span>@endif</td><td>@if($technician->technicianLocation)<a class="text-link" href="https://www.google.com/maps/search/?api=1&query={{ $technician->technicianLocation->latitude }},{{ $technician->technicianLocation->longitude }}" target="_blank" rel="noopener">Open pin <i class="ph ph-arrow-up-right"></i></a>@else&mdash;@endif</td></tr>
-        @empty
-            <tr><td colspan="4"><div class="empty-state">No technician accounts yet.</div></td></tr>
-        @endforelse
-    </tbody></table></div>
-</section>
 @endsection

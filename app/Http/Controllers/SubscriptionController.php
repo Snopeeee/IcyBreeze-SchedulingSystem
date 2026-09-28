@@ -35,7 +35,7 @@ class SubscriptionController extends Controller
             'quantity' => ['required', 'integer', 'min:1', 'max:5'],
             'next_service_date' => ['required', 'date', 'after_or_equal:tomorrow'],
             'preferred_day' => ['required', Rule::in(['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'])],
-            'preferred_time' => ['required', Rule::in(['08:00', '10:00', '13:00', '15:00'])],
+            'preferred_time' => ['required', Rule::in(config('scheduling.arrival_times'))],
             'first_name' => ['required', 'string', 'max:80'],
             'last_name' => ['required', 'string', 'max:80'],
             'email' => ['required', 'email', 'max:160'],
@@ -44,11 +44,8 @@ class SubscriptionController extends Controller
             'barangay' => ['required', 'string', 'max:100'],
             'city' => ['required', Rule::in(['Iligan City'])],
             'postal_code' => ['nullable', 'string', 'max:10'],
-            'landmark' => ['nullable', 'string', 'max:160'],
+            'landmark' => ['required', 'string', 'min:3', 'max:160'],
             'notes' => ['nullable', 'string', 'max:1000'],
-            'latitude' => ['nullable', 'numeric', 'between:-90,90', 'required_with:longitude'],
-            'longitude' => ['nullable', 'numeric', 'between:-180,180', 'required_with:latitude'],
-            'location_consent' => ['exclude_without:latitude', 'exclude_without:longitude', 'accepted'],
             'terms' => ['accepted'],
         ]);
 
@@ -92,10 +89,7 @@ class SubscriptionController extends Controller
                 'city' => 'Iligan City',
                 'province' => 'Lanao del Norte',
                 'postal_code' => $data['postal_code'] ?? null,
-                'landmark' => $data['landmark'] ?? null,
-                'latitude' => $data['latitude'] ?? null,
-                'longitude' => $data['longitude'] ?? null,
-                'location_consent_at' => isset($data['latitude'], $data['longitude']) ? now() : null,
+                'landmark' => $data['landmark'],
                 'notes' => $data['notes'] ?? null,
             ]);
         });
