@@ -51,7 +51,7 @@ WORKDIR /var/www/html
 
 COPY --from=composer:2 /usr/bin/composer /usr/local/bin/composer
 COPY composer.json composer.lock ./
-RUN --mount=type=cache,target=/tmp/composer-cache \
+RUN --mount=type=cache,id=icybreeze-composer,target=/tmp/composer-cache \
     apt-get update \
     && apt-get install -y --no-install-recommends git \
     && COMPOSER_CACHE_DIR=/tmp/composer-cache \
