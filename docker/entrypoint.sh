@@ -69,4 +69,12 @@ fi
 php artisan config:cache --no-interaction
 php artisan view:cache --no-interaction
 
+if [ "${1:-}" = "apache2-foreground" ]; then
+    find /etc/apache2/mods-enabled -maxdepth 1 -name 'mpm_*' -delete
+    ln -s ../mods-available/mpm_prefork.load /etc/apache2/mods-enabled/mpm_prefork.load
+    ln -s ../mods-available/mpm_prefork.conf /etc/apache2/mods-enabled/mpm_prefork.conf
+
+    apache2ctl configtest
+fi
+
 exec "$@"
