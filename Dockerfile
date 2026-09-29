@@ -47,6 +47,9 @@ RUN apt-get update \
     && a2enmod expires headers rewrite \
     && rm -rf /var/lib/apt/lists/*
 
+RUN (a2dismod mpm_event mpm_worker || true) \
+    && a2enmod mpm_prefork
+
 WORKDIR /var/www/html
 
 COPY --from=composer:2 /usr/bin/composer /usr/local/bin/composer
