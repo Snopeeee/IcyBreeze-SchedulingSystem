@@ -45,7 +45,7 @@ class AdminServiceController extends Controller
 
             if ((float) $rate['technician_share'] > (float) $rate['price']) {
                 throw ValidationException::withMessages([
-                    "rates.{$unitType->id}.technician_share" => "The technician share for {$unitType->name} cannot exceed its customer price.",
+                    "rates.{$unitType->id}.technician_share" => "The service cost for {$unitType->name} cannot exceed its customer price.",
                 ]);
             }
         }
@@ -67,7 +67,7 @@ class AdminServiceController extends Controller
             }
 
             $service->update([
-                'name' => 'Standard Cleaning',
+                'name' => 'Aircon Cleaning',
                 'short_description' => $data['short_description'],
                 'description' => $data['description'],
                 'price_centavos' => $minimumPrice,
@@ -78,6 +78,6 @@ class AdminServiceController extends Controller
             ]);
         });
 
-        return back()->with('success', 'Standard Cleaning and all unit prices were updated.');
+        return back()->with('success', 'Aircon Cleaning and all unit prices were updated.');
     }
 }

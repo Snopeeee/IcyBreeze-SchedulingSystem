@@ -6,8 +6,6 @@ use App\Models\AirconUnitType;
 use App\Models\Appointment;
 use App\Models\Customer;
 use App\Models\Service;
-use App\Models\Subscription;
-use App\Models\TechnicianLocation;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -22,19 +20,20 @@ class IcyBreezeSystemTest extends TestCase
 
         $this->get('/')
             ->assertOk()
-            ->assertSee('Breathe cleaner.')
+            ->assertSee('Professional aircon')
             ->assertSee($service->name)
             ->assertSee('Window Type Inverter')
             ->assertSee('₱1,000')
             ->assertDontSee('Deep Clean')
             ->assertDontSee('Cassette Type')
-            ->assertSee('IcyBreeze Care Plans')
-            ->assertSee('Cleaner air, cooler life.')
+            ->assertSee('Maintenance plans')
+            ->assertSee('Coming soon')
+            ->assertSee('Customer recommendations')
             ->assertSee('images/icybreeze-logo-compact.png')
             ->assertSee('images/icybreeze-logo-brand-inverse.png')
             ->assertSee('images/icybreeze-favicon.png')
             ->assertDontSee('Service price preview');
-        $this->get('/book')->assertOk()->assertSee('Schedule your cleaning');
+        $this->get('/book')->assertOk()->assertSee('Schedule an aircon cleaning');
     }
 
     public function test_customer_can_create_a_cash_appointment(): void
@@ -52,6 +51,30 @@ class IcyBreezeSystemTest extends TestCase
         $this->assertSame(40000, $appointment->gross_centavos);
         $this->assertDatabaseHas('payments', ['appointment_id' => $appointment->id, 'method' => 'cash', 'status' => 'unpaid']);
         $this->assertDatabaseHas('customers', ['email' => 'mika@example.test']);
+    }
+
+    public function test_simulated_online_payment_is_not_accepted(): void
+    {
+        $service = $this->service();
+        $data = $this->bookingData($service);
+        $data['payment_method'] = 'online';
+
+        $this->post('/book', $data)->assertSessionHasErrors('payment_method');
+        $this->assertDatabaseCount('appointments', 0);
+        $this->assertDatabaseCount('payments', 0);
+    }
+
+    public function test_production_seeder_creates_catalog_without_sample_records(): void
+    {
+        $this->seed();
+
+        $this->assertDatabaseHas('services', ['slug' => 'standard-clean', 'is_active' => true]);
+        $this->assertDatabaseHas('aircon_unit_types', ['slug' => 'split-type-inverter', 'price_centavos' => 100000]);
+        $this->assertDatabaseCount('users', 0);
+        $this->assertDatabaseCount('customers', 0);
+        $this->assertDatabaseCount('appointments', 0);
+        $this->assertDatabaseCount('payments', 0);
+        $this->assertDatabaseCount('subscriptions', 0);
     }
 
     public function test_every_pdf_unit_type_uses_its_exact_price_split(): void
@@ -101,68 +124,17 @@ class IcyBreezeSystemTest extends TestCase
         $this->assertDatabaseCount('appointments', 0);
     }
 
-    public function test_customer_can_request_a_quarterly_subscription(): void
+    public function test_maintenance_plan_requests_are_coming_soon_and_not_accepted(): void
     {
-        $service = $this->service();
-        $response = $this->post('/subscriptions', [
-            'plan' => 'quarterly_care',
-            'service_id' => $service->id,
-            'aircon_unit_type_id' => $this->unitType('split-type')->id,
-            'quantity' => 2,
-            'next_service_date' => now()->addDays(7)->format('Y-m-d'),
-            'preferred_day' => 'Saturday',
-            'preferred_time' => '10:00',
-            'first_name' => 'Mika',
-            'last_name' => 'Dela Cruz',
-            'email' => 'mika@example.test',
-            'phone' => '09171234567',
-            'address_line' => '12 Sampaguita Street',
-            'barangay' => 'Pala-o',
-            'city' => 'Iligan City',
-            'postal_code' => '9200',
-            'latitude' => 8.2286,
-            'longitude' => 124.2449,
-            'location_consent' => '1',
-            'terms' => '1',
-        ]);
-
-        $subscription = Subscription::firstOrFail();
-        $response->assertRedirect(route('subscriptions.success', [
-            'reference' => $subscription->reference,
-            'token' => $subscription->manage_token,
-        ]));
-        $this->assertSame('Split Type', $subscription->unit_type);
-        $this->assertSame(171000, $subscription->price_per_visit_centavos);
-        $this->assertSame(110000, $subscription->technician_share_per_visit_centavos);
-        $this->assertSame(61000, $subscription->gross_per_visit_centavos);
-        $this->assertSame('Iligan City', $subscription->city);
-        $this->assertNotNull($subscription->location_consent_at);
-    }
-
-    public function test_technician_can_open_mobile_jobs_and_share_location(): void
-    {
-        $technician = User::factory()->create([
-            'role' => 'technician',
-            'is_active' => true,
-        ]);
-
-        $this->actingAs($technician, 'technician')
-            ->get('/technician')
+        $this->get('/subscriptions')
             ->assertOk()
-            ->assertSee('Location and route tools');
+            ->assertSee('Maintenance Plans Are Coming Soon')
+            ->assertSee('Schedule a One-Time Cleaning')
+            ->assertSee('Not yet available')
+            ->assertDontSee('<form', false);
 
-        $this->actingAs($technician, 'technician')
-            ->postJson('/technician/location', [
-                'latitude' => 8.2286,
-                'longitude' => 124.2449,
-                'accuracy_meters' => 18,
-            ])
-            ->assertOk()
-            ->assertJsonPath('message', 'Location shared securely.');
-
-        $location = TechnicianLocation::firstOrFail();
-        $this->assertSame($technician->id, $location->user_id);
-        $this->assertSame('8.2286000', $location->latitude);
+        $this->post('/subscriptions')->assertStatus(405);
+        $this->assertDatabaseCount('subscriptions', 0);
     }
 
     public function test_admin_dashboard_requires_login_and_allows_admin(): void
@@ -172,18 +144,49 @@ class IcyBreezeSystemTest extends TestCase
         $admin = User::factory()->create(['role' => 'admin']);
         $this->actingAs($admin)->get('/admin')
             ->assertOk()
-            ->assertSee('Good morning')
-            ->assertSee('Revenue and gross trend')
+            ->assertSee('Operations Dashboard')
+            ->assertSee('Revenue and net trend')
             ->assertSee('Appointment volume')
             ->assertSee('Booked unit mix')
             ->assertSee('images/icybreeze-logo-compact-inverse.png')
             ->assertSee('images/icybreeze-favicon.png');
     }
 
+    public function test_live_availability_exposes_available_reserved_and_in_progress_states(): void
+    {
+        $service = $this->service();
+        $data = $this->bookingData($service);
+        $data['appointment_time'] = '13:00';
+        $this->post('/book', $data)->assertRedirect();
+
+        $date = $data['appointment_date'];
+        $available = $this->getJson('/book/availability?date='.$date.'&quantity=1')->assertOk()->json('slots');
+        $this->assertSame(['09:00', '13:00', '16:00'], array_column($available, 'time'));
+        $this->assertSame('reserved', collect($available)->firstWhere('time', '13:00')['status']);
+        $this->assertSame('available', collect($available)->firstWhere('time', '09:00')['status']);
+
+        Appointment::firstOrFail()->update(['status' => 'in_progress']);
+        $inProgress = $this->getJson('/book/availability?date='.$date.'&quantity=1')->assertOk()->json('slots');
+        $this->assertSame('in_progress', collect($inProgress)->firstWhere('time', '13:00')['status']);
+    }
+
+    public function test_booking_requires_a_landmark_and_rejects_retired_arrival_times(): void
+    {
+        $service = $this->service();
+        $missingLandmark = $this->bookingData($service);
+        unset($missingLandmark['landmark']);
+        $this->post('/book', $missingLandmark)->assertSessionHasErrors('landmark');
+
+        $retiredTime = $this->bookingData($service);
+        $retiredTime['appointment_time'] = '10:00';
+        $this->post('/book', $retiredTime)->assertSessionHasErrors('appointment_time');
+        $this->assertDatabaseCount('appointments', 0);
+    }
+
     private function service(): Service
     {
         return Service::create([
-            'name' => 'Standard Clean',
+            'name' => 'Aircon Cleaning',
             'slug' => 'standard-clean',
             'short_description' => 'Routine professional aircon cleaning.',
             'description' => 'Filter, cover, coil, drain, and cooling check.',
@@ -202,7 +205,7 @@ class IcyBreezeSystemTest extends TestCase
             'aircon_unit_type_id' => $this->unitType('split-type')->id,
             'quantity' => 1,
             'appointment_date' => now()->addDays(3)->format('Y-m-d'),
-            'appointment_time' => '10:00',
+            'appointment_time' => '09:00',
             'first_name' => 'Mika',
             'last_name' => 'Dela Cruz',
             'email' => 'mika@example.test',

@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Appointment;
 use App\Models\AppointmentStatusHistory;
-use App\Models\User;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -15,9 +14,15 @@ class AdminAppointmentController extends Controller
 {
     public function index(Request $request): View
     {
-        $query = Appointment::with(['customer', 'service', 'airconUnitType', 'technician']);
+        $query = Appointment::with(['customer', 'service', 'airconUnitType']);
 
-        $query->when($request->filled('status'), fn ($q) => $q->where('status', $request->string('status')))
+        $query->when($request->filled('status'), function ($q) use ($request) {
+            // Historical assignments remain confirmed bookings, without an assignment workflow.
+            $statuses = $request->input('status') === 'confirmed'
+                ? ['confirmed', 'assigned']
+                : [$request->input('status')];
+            $q->whereIn('status', $statuses);
+        })
             ->when($request->filled('payment'), fn ($q) => $q->where('payment_status', $request->string('payment')))
             ->when($request->filled('q'), function ($q) use ($request) {
                 $term = '%'.$request->string('q').'%';
@@ -33,15 +38,14 @@ class AdminAppointmentController extends Controller
     public function show(Appointment $appointment): View
     {
         return view('admin.appointments.show', [
-            'appointment' => $appointment->load(['customer', 'service', 'airconUnitType', 'technician', 'payments', 'histories']),
-            'technicians' => User::where('role', 'technician')->where('is_active', true)->orderBy('name')->get(),
+            'appointment' => $appointment->load(['customer', 'service', 'airconUnitType', 'payments', 'histories']),
         ]);
     }
 
     public function updateStatus(Request $request, Appointment $appointment): RedirectResponse
     {
         $data = $request->validate([
-            'status' => ['required', Rule::in(['pending_confirmation', 'confirmed', 'assigned', 'in_progress', 'completed', 'cancelled', 'no_show'])],
+            'status' => ['required', Rule::in(['pending_confirmation', 'confirmed', 'in_progress', 'completed', 'cancelled', 'no_show'])],
             'reason' => ['nullable', 'string', 'max:255'],
         ]);
 
@@ -72,7 +76,7 @@ class AdminAppointmentController extends Controller
     {
         $data = $request->validate([
             'appointment_date' => ['required', 'date', 'after_or_equal:today'],
-            'appointment_time' => ['required', Rule::in(['08:00', '10:00', '13:00', '15:00'])],
+            'appointment_time' => ['required', Rule::in(config('scheduling.arrival_times'))],
         ]);
 
         $startsAt = CarbonImmutable::createFromFormat('Y-m-d H:i', $data['appointment_date'].' '.$data['appointment_time'], config('app.timezone'));
@@ -97,31 +101,4 @@ class AdminAppointmentController extends Controller
         return back()->with('success', 'Appointment rescheduled.');
     }
 
-    public function assign(Request $request, Appointment $appointment): RedirectResponse
-    {
-        $data = $request->validate([
-            'technician_id' => ['nullable', Rule::exists('users', 'id')->where('role', 'technician')->where('is_active', true)],
-        ]);
-        $oldTechnician = $appointment->technician?->name;
-        $oldStatus = $appointment->status;
-        $appointment->update([
-            'technician_id' => $data['technician_id'] ?? null,
-            'status' => $data['technician_id'] ? 'assigned' : ($appointment->status === 'assigned' ? 'confirmed' : $appointment->status),
-        ]);
-        $appointment->load('technician');
-
-        AppointmentStatusHistory::create([
-            'appointment_id' => $appointment->id,
-            'from_status' => $oldStatus,
-            'to_status' => $appointment->status,
-            'actor_type' => 'admin',
-            'actor_name' => $request->user()->name,
-            'reason' => $appointment->technician
-                ? 'Assigned to '.$appointment->technician->name.'.'
-                : 'Technician assignment removed'.($oldTechnician ? ' from '.$oldTechnician : '').'.',
-            'created_at' => now(),
-        ]);
-
-        return back()->with('success', 'Technician assignment updated.');
-    }
 }

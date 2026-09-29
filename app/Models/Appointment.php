@@ -11,15 +11,15 @@ class Appointment extends Model
 {
     use HasFactory;
 
+    // Keep historical assigned bookings occupied; new bookings use the admin-managed statuses.
     public const ACTIVE_STATUSES = ['pending_payment', 'pending_confirmation', 'confirmed', 'assigned', 'in_progress'];
 
     protected $fillable = [
-        'reference', 'manage_token', 'customer_id', 'service_id', 'aircon_unit_type_id', 'technician_id', 'unit_type', 'quantity',
+        'reference', 'manage_token', 'customer_id', 'service_id', 'aircon_unit_type_id', 'unit_type', 'quantity',
         'unit_price_centavos',
         'starts_at', 'ends_at', 'status', 'payment_status', 'source', 'subtotal_centavos',
         'travel_fee_centavos', 'total_centavos', 'technician_share_centavos', 'gross_centavos', 'address_line', 'barangay', 'city',
-        'province', 'postal_code', 'landmark', 'latitude', 'longitude', 'location_accuracy_meters',
-        'location_consent_at', 'customer_notes', 'internal_notes',
+        'province', 'postal_code', 'landmark', 'customer_notes', 'internal_notes',
         'confirmed_at', 'completed_at', 'cancelled_at', 'cancellation_reason',
     ];
 
@@ -31,10 +31,6 @@ class Appointment extends Model
             'confirmed_at' => 'datetime',
             'completed_at' => 'datetime',
             'cancelled_at' => 'datetime',
-            'location_consent_at' => 'datetime',
-            'latitude' => 'decimal:7',
-            'longitude' => 'decimal:7',
-            'location_accuracy_meters' => 'decimal:2',
             'quantity' => 'integer',
             'subtotal_centavos' => 'integer',
             'travel_fee_centavos' => 'integer',
@@ -55,28 +51,9 @@ class Appointment extends Model
         return $this->belongsTo(Service::class);
     }
 
-    public function technician(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'technician_id');
-    }
-
     public function airconUnitType(): BelongsTo
     {
         return $this->belongsTo(AirconUnitType::class);
-    }
-
-    public function getHasGpsAttribute(): bool
-    {
-        return $this->latitude !== null && $this->longitude !== null;
-    }
-
-    public function getMapsUrlAttribute(): ?string
-    {
-        if (! $this->has_gps) {
-            return null;
-        }
-
-        return 'https://www.google.com/maps/search/?api=1&query='.$this->latitude.','.$this->longitude;
     }
 
     public function payments(): HasMany
@@ -106,6 +83,10 @@ class Appointment extends Model
 
     public function getStatusLabelAttribute(): string
     {
+        if ($this->status === 'assigned') {
+            return 'Confirmed';
+        }
+
         return str($this->status)->replace('_', ' ')->title()->toString();
     }
 

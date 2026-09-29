@@ -53,26 +53,7 @@ class User extends Authenticatable
 
     public function isAdmin(): bool
     {
-        return $this->role === 'admin';
+        return $this->role === 'admin' && $this->is_active;
     }
 
-    public function isTechnician(): bool
-    {
-        return $this->role === 'technician' && $this->is_active;
-    }
-
-    public function technicianAppointments(): \Illuminate\Database\Eloquent\Relations\HasMany
-    {
-        return $this->hasMany(Appointment::class, 'technician_id');
-    }
-
-    public function technicianLocation(): \Illuminate\Database\Eloquent\Relations\HasOne
-    {
-        return $this->hasOne(TechnicianLocation::class);
-    }
-
-    public function assignedSubscriptions(): \Illuminate\Database\Eloquent\Relations\HasMany
-    {
-        return $this->hasMany(Subscription::class, 'technician_id');
-    }
 }
