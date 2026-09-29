@@ -28,7 +28,6 @@ Route::get('/book/confirmation/{reference}', [BookingController::class, 'success
 Route::get('/manage-booking/{token}', [BookingController::class, 'manage'])->name('booking.manage');
 Route::post('/manage-booking/{token}/cancel', [BookingController::class, 'cancel'])->middleware('throttle:5,1')->name('booking.cancel');
 Route::get('/subscriptions', [SubscriptionController::class, 'create'])->name('subscriptions.create');
-Route::post('/subscriptions', [SubscriptionController::class, 'store'])->middleware('throttle:6,1')->name('subscriptions.store');
 Route::get('/subscriptions/confirmation/{reference}', [SubscriptionController::class, 'success'])->name('subscriptions.success');
 
 Route::prefix('admin')->name('admin.')->group(function () {

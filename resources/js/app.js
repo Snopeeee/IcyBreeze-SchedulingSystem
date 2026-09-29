@@ -251,25 +251,3 @@ if (wizard) {
     updateSummary();
     displayStep(current, false);
 }
-
-const subscriptionForm = document.querySelector('[data-subscription-form]');
-if (subscriptionForm) {
-    const updateSubscriptionEstimate = () => {
-        const unitType = subscriptionForm.querySelector('[name="aircon_unit_type_id"] option:checked');
-        const quantity = Number(subscriptionForm.querySelector('[name="quantity"]')?.value || 1);
-        const plan = subscriptionForm.querySelector('[name="plan"]:checked');
-        const price = Number(unitType?.dataset.price || 0);
-        const discount = Number(plan?.dataset.discount || 1);
-        const total = Math.round(price * quantity * discount);
-        const output = subscriptionForm.querySelector('[data-subscription-price]');
-        if (output) output.textContent = total ? money.format(total / 100) : '—';
-        subscriptionForm.querySelector('[data-plan-name]').textContent = plan?.dataset.label || 'Choose a plan';
-        subscriptionForm.querySelector('[data-plan-frequency]').textContent = plan?.dataset.frequency || '';
-        subscriptionForm.querySelector('[data-plan-units]').textContent = `${quantity} ${quantity === 1 ? 'unit' : 'units'} · ${unitType?.dataset.name || ''}`;
-    };
-
-    subscriptionForm.querySelectorAll('[name="aircon_unit_type_id"], [name="quantity"], [name="plan"]').forEach((field) => {
-        field.addEventListener('change', updateSubscriptionEstimate);
-    });
-    updateSubscriptionEstimate();
-}

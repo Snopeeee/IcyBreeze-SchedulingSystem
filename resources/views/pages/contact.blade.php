@@ -1,7 +1,7 @@
 @extends('layouts.site')
 @php($title = 'Contact IcyBreeze')
 @section('content')
-<section class="page-hero"><div class="site-shell page-intro"><span class="eyebrow">Customer support</span><h1>Contact IcyBreeze</h1><p>Contact our office for assistance with services, maintenance plans, or an existing appointment.</p></div></section>
+<section class="page-hero"><div class="site-shell page-intro"><span class="eyebrow">Customer support</span><h1>Contact IcyBreeze</h1><p>Contact our office for assistance with cleaning services, future maintenance-plan updates, or an existing appointment.</p></div></section>
 <section class="section contact-section">
     <div class="site-shell">
         <article class="contact-primary">
@@ -23,7 +23,7 @@
 
         <div class="contact-grid">
             <article class="info-card"><div class="feature-icon"><i class="ph ph-phone-call"></i></div><h2>Phone</h2><p>For service inquiries and appointment changes.</p><a class="text-link" href="tel:{{ config('business.phone_e164') }}">{{ config('business.phone_display') }} <i class="ph ph-arrow-up-right"></i></a></article>
-            <article class="info-card"><div class="feature-icon"><i class="ph ph-envelope-simple"></i></div><h2>Email</h2><p>For care plans and general business inquiries.</p><a class="text-link contact-email" href="mailto:{{ config('business.email') }}">{{ config('business.email') }} <i class="ph ph-arrow-up-right"></i></a></article>
+            <article class="info-card"><div class="feature-icon"><i class="ph ph-envelope-simple"></i></div><h2>Email</h2><p>For general business inquiries and future maintenance-plan updates.</p><a class="text-link contact-email" href="mailto:{{ config('business.email') }}">{{ config('business.email') }} <i class="ph ph-arrow-up-right"></i></a></article>
             <article class="info-card"><div class="feature-icon"><i class="ph-fill ph-facebook-logo"></i></div><h2>Facebook</h2><p>Visit our official page for updates or send us a message.</p><a class="text-link" href="{{ config('business.facebook_url') }}" target="_blank" rel="noopener noreferrer">{{ config('business.facebook_handle') }} <i class="ph ph-arrow-up-right"></i></a></article>
             <article class="info-card"><div class="feature-icon"><i class="ph ph-instagram-logo"></i></div><h2>Instagram</h2><p>Follow our official account for IcyBreeze updates.</p><a class="text-link" href="{{ config('business.instagram_url') }}" target="_blank" rel="noopener noreferrer">{{ config('business.instagram_handle') }} <i class="ph ph-arrow-up-right"></i></a></article>
             <article class="info-card"><div class="feature-icon"><i class="ph ph-clock"></i></div><h2>Service hours</h2><p>{{ config('business.hours_full') }}</p><a class="text-link" href="{{ route('booking.create') }}">View available schedules <i class="ph ph-arrow-right"></i></a></article>

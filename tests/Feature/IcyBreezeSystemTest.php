@@ -6,7 +6,6 @@ use App\Models\AirconUnitType;
 use App\Models\Appointment;
 use App\Models\Customer;
 use App\Models\Service;
-use App\Models\Subscription;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -28,6 +27,7 @@ class IcyBreezeSystemTest extends TestCase
             ->assertDontSee('Deep Clean')
             ->assertDontSee('Cassette Type')
             ->assertSee('Maintenance plans')
+            ->assertSee('Coming soon')
             ->assertSee('Customer recommendations')
             ->assertSee('images/icybreeze-logo-compact.png')
             ->assertSee('images/icybreeze-logo-brand-inverse.png')
@@ -124,45 +124,17 @@ class IcyBreezeSystemTest extends TestCase
         $this->assertDatabaseCount('appointments', 0);
     }
 
-    public function test_customer_can_request_a_quarterly_subscription(): void
+    public function test_maintenance_plan_requests_are_coming_soon_and_not_accepted(): void
     {
-        $service = $this->service();
-        $response = $this->post('/subscriptions', [
-            'plan' => 'quarterly_care',
-            'service_id' => $service->id,
-            'aircon_unit_type_id' => $this->unitType('split-type')->id,
-            'quantity' => 2,
-            'next_service_date' => now()->addDays(7)->format('Y-m-d'),
-            'preferred_day' => 'Saturday',
-            'preferred_time' => '09:00',
-            'first_name' => 'Mika',
-            'last_name' => 'Dela Cruz',
-            'email' => 'mika@example.test',
-            'phone' => '09171234567',
-            'address_line' => '12 Sampaguita Street',
-            'barangay' => 'Pala-o',
-            'city' => 'Iligan City',
-            'postal_code' => '9200',
-            'landmark' => 'Near the public market',
-            'latitude' => 8.2286,
-            'longitude' => 124.2449,
-            'location_consent' => '1',
-            'terms' => '1',
-        ]);
+        $this->get('/subscriptions')
+            ->assertOk()
+            ->assertSee('Maintenance Plans Are Coming Soon')
+            ->assertSee('Schedule a One-Time Cleaning')
+            ->assertSee('Not yet available')
+            ->assertDontSee('<form', false);
 
-        $subscription = Subscription::firstOrFail();
-        $response->assertRedirect(route('subscriptions.success', [
-            'reference' => $subscription->reference,
-            'token' => $subscription->manage_token,
-        ]));
-        $this->assertSame('Split Type', $subscription->unit_type);
-        $this->assertSame(171000, $subscription->price_per_visit_centavos);
-        $this->assertSame(110000, $subscription->technician_share_per_visit_centavos);
-        $this->assertSame(61000, $subscription->gross_per_visit_centavos);
-        $this->assertSame('Iligan City', $subscription->city);
-        $this->assertNull($subscription->location_consent_at);
-        $this->assertNull($subscription->latitude);
-        $this->assertNull($subscription->longitude);
+        $this->post('/subscriptions')->assertStatus(405);
+        $this->assertDatabaseCount('subscriptions', 0);
     }
 
     public function test_admin_dashboard_requires_login_and_allows_admin(): void

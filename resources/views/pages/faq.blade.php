@@ -1,7 +1,7 @@
 @extends('layouts.site')
 @php($title = 'Frequently Asked Questions')
 @section('content')
-<section class="page-hero"><div class="site-shell page-intro"><span class="eyebrow">Customer information</span><h1>Frequently Asked Questions</h1><p>Review information about scheduling, service preparation, payments, and recurring maintenance.</p></div></section>
+<section class="page-hero"><div class="site-shell page-intro"><span class="eyebrow">Customer information</span><h1>Frequently Asked Questions</h1><p>Review information about scheduling, service preparation, payments, and future maintenance options.</p></div></section>
 <section class="section"><div class="site-shell faq-list">
 @foreach([
 ['How often should my aircon be cleaned?','For typical residential use, professional cleaning every three to six months is generally recommended. Heavy daily use, pets, construction dust, or reduced airflow may require more frequent service.'],
@@ -10,7 +10,7 @@
 ['Can I cancel or change my booking?','The private appointment-management link allows you to review the booking. Online cancellation is available until 24 hours before the appointment; for later changes, contact our office directly.'],
 ['What arrival times can I choose?','Live booking windows are available at 9:00 AM, 1:00 PM, and 4:00 PM. The schedule marks each window as available, reserved, or in progress before you continue.'],
 ['How can I pay?','Payment is collected in cash after the completed service. The office records the payment status in the system for reconciliation.'],
-['How do recurring care plans work?','Choose quarterly or biannual care, a preferred first date, and your usual service. The office confirms each upcoming visit and you pay per completed visit.'],
+['Are recurring maintenance plans available?','Not yet. Quarterly and biannual maintenance options are being evaluated and will be announced when pricing and operating details are finalized. One-time cleaning appointments remain available.'],
 ['How do I provide my service location?','Enter your full street address, Iligan City barangay, and a nearby landmark in the booking form. No GPS or location sharing is required.'],
 ['Do you repair aircon units?','IcyBreeze focuses on cleaning. If our team identifies a likely repair issue, it will be documented so you can arrange the appropriate repair service.']
 ] as [$question,$answer])

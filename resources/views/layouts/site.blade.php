@@ -61,7 +61,7 @@
                 <div class="site-nav-links">
                     <a class="{{ request()->routeIs('services') ? 'is-active' : '' }}" href="{{ route('services') }}">Services</a>
                     <a class="{{ request()->routeIs('how') ? 'is-active' : '' }}" href="{{ route('how') }}">Service Process</a>
-                    <a class="{{ request()->routeIs('subscriptions.*') ? 'is-active' : '' }}" href="{{ route('subscriptions.create') }}">Maintenance Plans</a>
+                    <a class="{{ request()->routeIs('subscriptions.*') ? 'is-active' : '' }}" href="{{ route('subscriptions.create') }}">Maintenance Plans <span class="nav-status">Soon</span></a>
                     <a class="{{ request()->routeIs('coverage') ? 'is-active' : '' }}" href="{{ route('coverage') }}">Service Area</a>
                     <a class="{{ request()->routeIs('faq') ? 'is-active' : '' }}" href="{{ route('faq') }}">FAQs</a>
                 </div>
@@ -86,7 +86,7 @@
                     <a href="{{ $business['instagram_url'] }}" target="_blank" rel="noopener noreferrer" aria-label="IcyBreeze on Instagram"><i class="ph ph-instagram-logo"></i></a>
                 </div>
             </div>
-            <div><h3>Information</h3><a href="{{ route('services') }}">Services and Pricing</a><a href="{{ route('how') }}">Service Process</a><a href="{{ route('subscriptions.create') }}">Maintenance Plans</a><a href="{{ route('coverage') }}">Service Area</a><a href="{{ route('faq') }}">Frequently Asked Questions</a></div>
+            <div><h3>Information</h3><a href="{{ route('services') }}">Services and Pricing</a><a href="{{ route('how') }}">Service Process</a><a href="{{ route('subscriptions.create') }}">Maintenance Plans (Coming Soon)</a><a href="{{ route('coverage') }}">Service Area</a><a href="{{ route('faq') }}">Frequently Asked Questions</a></div>
             <div><h3>Customer Support</h3><a href="tel:{{ $business['phone_e164'] }}">{{ $business['phone_display'] }}</a><a href="mailto:{{ $business['email'] }}">{{ $business['email'] }}</a><a href="{{ route('contact') }}">Contact IcyBreeze</a><span>{{ $business['base_location'] }}</span><span>{{ $business['hours_short'] }}</span></div>
             <div class="footer-book"><h3>Schedule professional service</h3><p>Select the unit type and an available appointment window.</p><a class="button button-yellow" href="{{ route('booking.create') }}">Schedule Service <i class="ph ph-arrow-right"></i></a></div>
         </div>

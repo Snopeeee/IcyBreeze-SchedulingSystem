@@ -17,7 +17,7 @@
     <div class="metric-card metric-card-cyan"><div class="metric-head"><span>Today's appointments</span><i class="ph ph-calendar-check"></i></div><div class="metric-value">{{ $todayCount }}</div><div class="metric-note">Scheduled for today</div></div>
     <div class="metric-card"><div class="metric-head"><span>Confirmed appointments</span><i class="ph ph-check-circle"></i></div><div class="metric-value">{{ $upcomingCount }}</div><div class="metric-note">Upcoming service appointments</div></div>
     <div class="metric-card metric-card-sun"><div class="metric-head"><span>Requires attention</span><i class="ph ph-bell-ringing"></i></div><div class="metric-value">{{ $attentionCount }}</div><div class="metric-note">Pending or unpaid appointments</div></div>
-    <div class="metric-card"><div class="metric-head"><span>Maintenance plans</span><i class="ph ph-arrows-clockwise"></i></div><div class="metric-value">{{ $subscriptionCount }}</div><div class="metric-note">Pending or active plans</div></div>
+    <div class="metric-card"><div class="metric-head"><span>Maintenance plan records</span><i class="ph ph-arrows-clockwise"></i></div><div class="metric-value">{{ $subscriptionCount }}</div><div class="metric-note">Legacy or future plan records</div></div>
 </div>
 
 <div class="dashboard-section-heading">

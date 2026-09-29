@@ -43,26 +43,26 @@
 <section class="section subscription-section" id="plans">
     <div class="site-shell subscription-layout">
         <div class="subscription-copy">
-            <span class="eyebrow">Maintenance plans</span>
-            <h2>Scheduled maintenance throughout the year</h2>
-            <p>Select a recurring schedule based on your usage. Our office reviews the request and confirms each service visit.</p>
-            <ul class="check-list"><li><i class="ph-fill ph-check-circle"></i> Quarterly or biannual service options</li><li><i class="ph-fill ph-check-circle"></i> 5–10% plan discount per completed visit</li><li><i class="ph-fill ph-check-circle"></i> Schedule adjustments coordinated through our office</li></ul>
-            <a class="button button-navy" href="{{ route('subscriptions.create') }}">View Maintenance Plans <i class="ph ph-arrow-right"></i></a>
+            <span class="eyebrow">Maintenance plans · Coming soon</span>
+            <h2>Recurring care is currently in development</h2>
+            <p>We are preparing future maintenance options for customers who prefer scheduled aircon care throughout the year. Enrollment, pricing, and final plan terms are not yet available.</p>
+            <ul class="check-list"><li><i class="ph-fill ph-check-circle"></i> Quarterly and biannual options under review</li><li><i class="ph-fill ph-check-circle"></i> Plan pricing will be announced at launch</li><li><i class="ph-fill ph-check-circle"></i> One-time cleaning appointments remain available</li></ul>
+            <a class="button button-navy" href="{{ route('subscriptions.create') }}">Preview Upcoming Plans <i class="ph ph-arrow-right"></i></a>
         </div>
         <div class="plan-stack">
-            <article class="plan-card plan-card-featured"><span class="plan-kicker">Recommended for frequent use</span><div class="plan-icon"><i class="ph ph-arrows-clockwise"></i></div><h3>Quarterly Care</h3><p>Four scheduled cleanings each year for regularly used units.</p><div class="plan-saving"><strong>Save 10%</strong><span>per visit</span></div></article>
-            <article class="plan-card"><span class="plan-kicker">Suitable for moderate use</span><div class="plan-icon"><i class="ph ph-calendar-dots"></i></div><h3>Biannual Care</h3><p>Two scheduled cleanings each year for moderately used units.</p><div class="plan-saving"><strong>Save 5%</strong><span>per visit</span></div></article>
+            <article class="plan-card plan-card-featured"><span class="plan-kicker">Planned option</span><div class="plan-icon"><i class="ph ph-arrows-clockwise"></i></div><h3>Quarterly Care</h3><p>A recurring option being considered for frequently used aircon units.</p><div class="plan-saving"><strong>Coming Soon</strong><span>Details under review</span></div></article>
+            <article class="plan-card"><span class="plan-kicker">Planned option</span><div class="plan-icon"><i class="ph ph-calendar-dots"></i></div><h3>Biannual Care</h3><p>A recurring option being considered for moderately used aircon units.</p><div class="plan-saving"><strong>Coming Soon</strong><span>Details under review</span></div></article>
         </div>
     </div>
 </section>
 
 <section class="section section-ice">
     <div class="site-shell">
-        <div class="section-heading center"><span class="eyebrow">Customer information</span><h2>Service information and customer support</h2><p>Review pricing, understand the service process, request recurring maintenance, or consult our frequently asked questions.</p></div>
+        <div class="section-heading center"><span class="eyebrow">Customer information</span><h2>Service information and customer support</h2><p>Review pricing, understand the service process, preview future maintenance options, or consult our frequently asked questions.</p></div>
         <div class="explore-grid">
             <a class="explore-card" href="{{ route('services') }}"><i class="ph ph-broom"></i><span><strong>Review services and pricing</strong><small>Compare rates for each supported unit type.</small></span><i class="ph ph-arrow-up-right"></i></a>
             <a class="explore-card" href="{{ route('how') }}"><i class="ph ph-list-checks"></i><span><strong>Review the service process</strong><small>Understand each stage of the appointment.</small></span><i class="ph ph-arrow-up-right"></i></a>
-            <a class="explore-card" href="{{ route('subscriptions.create') }}"><i class="ph ph-arrows-clockwise"></i><span><strong>Request a maintenance plan</strong><small>Arrange recurring cleaning services.</small></span><i class="ph ph-arrow-up-right"></i></a>
+            <a class="explore-card" href="{{ route('subscriptions.create') }}"><i class="ph ph-arrows-clockwise"></i><span><strong>Preview maintenance plans</strong><small>See the recurring options currently in development.</small></span><span class="explore-status">Coming Soon</span></a>
             <a class="explore-card" href="{{ route('faq') }}"><i class="ph ph-chat-circle-dots"></i><span><strong>Read frequently asked questions</strong><small>Review scheduling, preparation, and payment information.</small></span><i class="ph ph-arrow-up-right"></i></a>
         </div>
     </div>
@@ -165,7 +165,7 @@
 
 <section class="section section-ice">
     <div class="site-shell coverage-callout">
-        <div><span class="eyebrow">Iligan City service area</span><h2>Professional aircon cleaning throughout Iligan City</h2><p>One-time appointments and maintenance plans are available Monday through Saturday.</p></div>
+        <div><span class="eyebrow">Iligan City service area</span><h2>Professional aircon cleaning throughout Iligan City</h2><p>One-time cleaning appointments are available Monday through Saturday. Recurring maintenance plans are coming soon.</p></div>
         <div class="coverage-actions"><a class="button button-cyan" href="{{ route('booking.create') }}">View Available Schedules</a><a class="button button-ghost" href="{{ route('coverage') }}">Review Service Area</a></div>
     </div>
 </section>

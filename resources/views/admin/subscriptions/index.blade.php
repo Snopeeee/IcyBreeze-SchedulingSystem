@@ -2,7 +2,7 @@
 @php($title = 'Subscriptions')
 
 @section('content')
-<div class="admin-top"><div><h1>Maintenance Plans</h1><p>Review recurring aircon cleaning requests, pricing, schedules, and plan status.</p></div><a class="button button-navy button-small" href="{{ route('subscriptions.create') }}" target="_blank"><i class="ph ph-arrow-square-out"></i> View Public Plan Page</a></div>
+<div class="admin-top"><div><h1>Maintenance Plan Records</h1><p>Review legacy records and prepare for future recurring-service offerings. Public enrollment is currently unavailable.</p></div><a class="button button-navy button-small" href="{{ route('subscriptions.create') }}" target="_blank"><i class="ph ph-arrow-square-out"></i> View Coming Soon Page</a></div>
 <form class="admin-filters" method="GET"><select aria-label="Filter by status" name="status"><option value="">All statuses</option>@foreach(['pending','active','paused','cancelled'] as $status)<option value="{{ $status }}" @selected(request('status')===$status)>{{ Str::title($status) }}</option>@endforeach</select><button class="button button-navy button-small">Apply</button>@if(request('status'))<a class="button button-ghost button-small" href="{{ route('admin.subscriptions.index') }}">Clear</a>@endif</form>
 <div class="admin-page-card"><div class="admin-table-wrap"><table class="admin-table">
     <thead><tr><th>Plan / customer</th><th>Aircon</th><th>Per visit finances</th><th>Location</th><th>Next visit</th><th>Update plan</th></tr></thead>

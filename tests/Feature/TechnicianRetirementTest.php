@@ -4,6 +4,8 @@ namespace Tests\Feature;
 
 use App\Models\AirconUnitType;
 use App\Models\Appointment;
+use App\Models\Customer;
+use App\Models\Service;
 use App\Models\Subscription;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -131,14 +133,39 @@ class TechnicianRetirementTest extends TestCase
     public function test_care_plan_updates_ignore_retired_assignment_fields(): void
     {
         $this->seed();
-        $data = array_merge($this->bookingData(), [
+        $customer = Customer::create([
+            'first_name' => 'Legacy',
+            'last_name' => 'Customer',
+            'email' => 'legacy-plan@example.test',
+            'phone' => '09171234567',
+        ]);
+        $service = Service::bookable()->firstOrFail();
+        $unitType = AirconUnitType::where('slug', 'split-type')->firstOrFail();
+        $subscription = Subscription::create([
+            'reference' => 'SUB-LEGACY-001',
+            'manage_token' => str_repeat('a', 48),
+            'customer_id' => $customer->id,
+            'service_id' => $service->id,
+            'aircon_unit_type_id' => $unitType->id,
             'plan' => 'quarterly_care',
+            'unit_type' => $unitType->name,
+            'interval_months' => 3,
+            'quantity' => 1,
+            'unit_price_centavos' => $unitType->price_centavos,
+            'price_per_visit_centavos' => $unitType->price_centavos,
+            'technician_share_per_visit_centavos' => $unitType->technician_share_centavos,
+            'gross_per_visit_centavos' => $unitType->price_centavos - $unitType->technician_share_centavos,
+            'status' => 'pending',
             'next_service_date' => now()->addDays(7)->toDateString(),
             'preferred_day' => 'Saturday',
             'preferred_time' => '09:00',
+            'address_line' => '12 Test Street',
+            'barangay' => 'Pala-o',
+            'city' => 'Iligan City',
+            'province' => 'Lanao del Norte',
+            'postal_code' => '9200',
+            'landmark' => 'Near the public market',
         ]);
-        $this->post('/subscriptions', $data)->assertSessionHasNoErrors()->assertRedirect();
-        $subscription = Subscription::firstOrFail();
         $legacyAccount = User::factory()->create(['role' => 'technician']);
         DB::table('subscriptions')->where('id', $subscription->id)->update(['technician_id' => $legacyAccount->id]);
 
