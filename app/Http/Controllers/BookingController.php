@@ -8,6 +8,7 @@ use App\Models\AirconUnitType;
 use App\Models\Customer;
 use App\Models\Payment;
 use App\Models\Service;
+use App\Integrations\BookingNotifications;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\JsonResponse;
@@ -46,7 +47,7 @@ class BookingController extends Controller
         ]);
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request, BookingNotifications $notifications): RedirectResponse
     {
         $data = $request->validate([
             'aircon_unit_type_id' => [
@@ -155,6 +156,8 @@ class BookingController extends Controller
 
             return $appointment;
         });
+
+        $notifications->send($appointment);
 
         return redirect()->route('booking.success', [
             'reference' => $appointment->reference,

@@ -10,6 +10,8 @@ use App\Http\Controllers\AdminSubscriptionController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\SiteController;
 use App\Http\Controllers\SubscriptionController;
+use App\Http\Controllers\PayPalPaymentController;
+use App\Http\Controllers\AdminIntegrationController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [SiteController::class, 'home'])->name('home');
@@ -27,6 +29,9 @@ Route::post('/book', [BookingController::class, 'store'])->middleware('throttle:
 Route::get('/book/confirmation/{reference}', [BookingController::class, 'success'])->name('booking.success');
 Route::get('/manage-booking/{token}', [BookingController::class, 'manage'])->name('booking.manage');
 Route::post('/manage-booking/{token}/cancel', [BookingController::class, 'cancel'])->middleware('throttle:5,1')->name('booking.cancel');
+Route::post('/manage-booking/{token}/paypal', [PayPalPaymentController::class, 'start'])->middleware('throttle:5,1')->name('paypal.start');
+Route::get('/manage-booking/{token}/paypal/return', [PayPalPaymentController::class, 'complete'])->middleware('throttle:8,1')->name('paypal.return');
+Route::get('/manage-booking/{token}/paypal/cancel', [PayPalPaymentController::class, 'cancel'])->name('paypal.cancel');
 Route::get('/subscriptions', [SubscriptionController::class, 'create'])->name('subscriptions.create');
 Route::get('/subscriptions/confirmation/{reference}', [SubscriptionController::class, 'success'])->name('subscriptions.success');
 
@@ -43,9 +48,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::patch('/appointments/{appointment}/reschedule', [AdminAppointmentController::class, 'reschedule'])->name('appointments.reschedule');
         Route::get('/payments', [AdminPaymentController::class, 'index'])->name('payments.index');
         Route::patch('/payments/{payment}', [AdminPaymentController::class, 'update'])->name('payments.update');
+        Route::post('/payments/{payment}/verify-paypal', [AdminPaymentController::class, 'reconcile'])->middleware('throttle:10,1')->name('payments.verify-paypal');
+        Route::post('/payments/{payment}/switch-to-cash', [AdminPaymentController::class, 'switchToCash'])->middleware('throttle:10,1')->name('payments.switch-to-cash');
         Route::get('/services', [AdminServiceController::class, 'index'])->name('services.index');
         Route::patch('/services/{service}', [AdminServiceController::class, 'update'])->name('services.update');
         Route::get('/customers', [AdminCustomerController::class, 'index'])->name('customers.index');
+        Route::get('/integrations', [AdminIntegrationController::class, 'index'])->name('integrations.index');
+        Route::post('/appointments/{appointment}/lookup-address', [AdminIntegrationController::class, 'lookupAddress'])->middleware('throttle:10,1')->name('appointments.lookup-address');
         Route::get('/subscriptions', [AdminSubscriptionController::class, 'index'])->name('subscriptions.index');
         Route::patch('/subscriptions/{subscription}', [AdminSubscriptionController::class, 'update'])->name('subscriptions.update');
     });

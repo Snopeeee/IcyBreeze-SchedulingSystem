@@ -14,6 +14,7 @@
             <a class="{{ request()->routeIs('admin.customers.*') ? 'is-active' : '' }}" href="{{ route('admin.customers.index') }}"><i class="ph ph-users-three"></i><span>Customers</span></a>
             <a class="{{ request()->routeIs('admin.subscriptions.*') ? 'is-active' : '' }}" href="{{ route('admin.subscriptions.index') }}"><i class="ph ph-arrows-clockwise"></i><span>Maintenance Plans</span></a>
             <a class="{{ request()->routeIs('admin.services.*') ? 'is-active' : '' }}" href="{{ route('admin.services.index') }}"><i class="ph ph-broom"></i><span>Services</span></a>
+            <a class="{{ request()->routeIs('admin.integrations.*') ? 'is-active' : '' }}" href="{{ route('admin.integrations.index') }}"><i class="ph ph-plugs-connected"></i><span>API Integrations</span></a>
         </nav>
         <div class="admin-label">Website</div>
         <nav class="admin-nav"><a href="{{ route('home') }}" target="_blank"><i class="ph ph-arrow-square-out"></i><span>View website</span></a></nav>
