@@ -12,6 +12,8 @@ use App\Http\Controllers\SiteController;
 use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\PayPalPaymentController;
 use App\Http\Controllers\AdminIntegrationController;
+use App\Http\Controllers\AdminFaqController;
+use App\Http\Controllers\CustomerAuthController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [SiteController::class, 'home'])->name('home');
@@ -20,6 +22,17 @@ Route::get('/how-it-works', fn () => app(SiteController::class)->page('how-it-wo
 Route::get('/coverage', fn () => app(SiteController::class)->page('coverage'))->name('coverage');
 Route::get('/faq', fn () => app(SiteController::class)->page('faq'))->name('faq');
 Route::get('/contact', fn () => app(SiteController::class)->page('contact'))->name('contact');
+
+Route::prefix('account')->name('customer.')->group(function () {
+    Route::get('/login', [CustomerAuthController::class, 'showLogin'])->name('login');
+    Route::post('/login', [CustomerAuthController::class, 'login'])->middleware('throttle:10,1')->name('login.store');
+    Route::get('/register', [CustomerAuthController::class, 'showRegister'])->name('register');
+    Route::post('/register', [CustomerAuthController::class, 'register'])->middleware('throttle:5,1')->name('register.store');
+    Route::middleware('auth')->group(function () {
+        Route::get('/', [CustomerAuthController::class, 'dashboard'])->name('dashboard');
+        Route::post('/logout', [CustomerAuthController::class, 'logout'])->name('logout');
+    });
+});
 
 Route::get('/book', [BookingController::class, 'create'])->name('booking.create');
 Route::get('/book/availability', [BookingController::class, 'availability'])
@@ -54,6 +67,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::patch('/services/{service}', [AdminServiceController::class, 'update'])->name('services.update');
         Route::get('/customers', [AdminCustomerController::class, 'index'])->name('customers.index');
         Route::get('/integrations', [AdminIntegrationController::class, 'index'])->name('integrations.index');
+        Route::post('/integrations/verify-service-area', [AdminIntegrationController::class, 'verifyServiceArea'])->middleware('throttle:1,1')->name('integrations.verify-service-area');
+        Route::resource('faqs', AdminFaqController::class)->except('show');
         Route::post('/appointments/{appointment}/lookup-address', [AdminIntegrationController::class, 'lookupAddress'])->middleware('throttle:10,1')->name('appointments.lookup-address');
         Route::get('/subscriptions', [AdminSubscriptionController::class, 'index'])->name('subscriptions.index');
         Route::patch('/subscriptions/{subscription}', [AdminSubscriptionController::class, 'update'])->name('subscriptions.update');

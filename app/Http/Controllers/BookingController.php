@@ -41,6 +41,10 @@ class BookingController extends Controller
             'quantity' => ['nullable', 'integer', 'min:1', 'max:5'],
         ]);
 
+        if ($request->user() && ! $request->user()->isAdmin() && Str::lower($data['email']) !== Str::lower($request->user()->email)) {
+            return back()->withErrors(['email' => 'Please use the email address on your customer account.'])->withInput();
+        }
+
         return response()->json([
             'date' => $data['date'],
             'slots' => $this->availabilityFor($data['date'], (int) ($data['quantity'] ?? 1)),
@@ -84,7 +88,8 @@ class BookingController extends Controller
         $technicianShare = $unitType->technician_share_centavos * $data['quantity'];
         $gross = $subtotal - $technicianShare;
 
-        $appointment = DB::transaction(function () use ($data, $service, $unitType, $startsAt, $endsAt, $subtotal, $technicianShare, $gross) {
+        $accountId = $request->user() && ! $request->user()->isAdmin() ? $request->user()->id : null;
+        $appointment = DB::transaction(function () use ($data, $service, $unitType, $startsAt, $endsAt, $subtotal, $technicianShare, $gross, $accountId) {
             $conflict = Appointment::whereIn('status', Appointment::ACTIVE_STATUSES)
                 ->where('starts_at', '<', $endsAt)
                 ->where('ends_at', '>', $startsAt)
@@ -108,6 +113,7 @@ class BookingController extends Controller
                 'reference' => $reference,
                 'manage_token' => Str::random(48),
                 'customer_id' => $customer->id,
+                'user_id' => $accountId,
                 'service_id' => $service->id,
                 'aircon_unit_type_id' => $unitType->id,
                 'unit_type' => $unitType->name,

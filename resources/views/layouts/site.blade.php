@@ -64,6 +64,7 @@
                     <a class="{{ request()->routeIs('subscriptions.*') ? 'is-active' : '' }}" href="{{ route('subscriptions.create') }}">Maintenance Plans <span class="nav-status">Soon</span></a>
                     <a class="{{ request()->routeIs('coverage') ? 'is-active' : '' }}" href="{{ route('coverage') }}">Service Area</a>
                     <a class="{{ request()->routeIs('faq') ? 'is-active' : '' }}" href="{{ route('faq') }}">FAQs</a>
+                    <a class="{{ request()->routeIs('customer.*') ? 'is-active' : '' }}" href="{{ route(auth()->check() && !auth()->user()->isAdmin() ? 'customer.dashboard' : 'customer.login') }}">{{ auth()->check() && !auth()->user()->isAdmin() ? 'My Account' : 'Customer Sign In' }}</a>
                 </div>
                 <a class="nav-cta" href="{{ route('booking.create') }}"><i class="ph ph-calendar-check"></i> Schedule Service</a>
             </nav>
@@ -90,7 +91,7 @@
             <div><h3>Customer Support</h3><a href="tel:{{ $business['phone_e164'] }}">{{ $business['phone_display'] }}</a><a href="mailto:{{ $business['email'] }}">{{ $business['email'] }}</a><a href="{{ route('contact') }}">Contact IcyBreeze</a><span>{{ $business['base_location'] }}</span><span>{{ $business['hours_short'] }}</span></div>
             <div class="footer-book"><h3>Schedule professional service</h3><p>Select the unit type and an available appointment window.</p><a class="button button-yellow" href="{{ route('booking.create') }}">Schedule Service <i class="ph ph-arrow-right"></i></a></div>
         </div>
-        <div class="site-shell footer-bottom"><span>© {{ now()->year }} IcyBreeze Aircon Cleaning · Iligan City</span><span><a href="{{ route('admin.login') }}">Admin portal</a></span></div>
+        <div class="site-shell footer-bottom"><span>© {{ now()->year }} IcyBreeze Aircon Cleaning · Iligan City</span><span><a href="{{ route('customer.login') }}">Customer account</a> · <a href="{{ route('admin.login') }}">Admin portal</a></span></div>
     </footer>
 </body>
 </html>

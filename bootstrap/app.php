@@ -22,7 +22,7 @@ return Application::configure(basePath: dirname(__DIR__))
                 | Request::HEADER_X_FORWARDED_PREFIX,
         );
         $middleware->alias(['admin' => EnsureAdmin::class]);
-        $middleware->redirectGuestsTo(fn (Request $request) => route('admin.login'));
+        $middleware->redirectGuestsTo(fn (Request $request) => $request->is('admin/*') || $request->is('admin') ? route('admin.login') : route('customer.login'));
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

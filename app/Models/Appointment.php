@@ -15,7 +15,7 @@ class Appointment extends Model
     public const ACTIVE_STATUSES = ['pending_payment', 'pending_confirmation', 'confirmed', 'assigned', 'in_progress'];
 
     protected $fillable = [
-        'reference', 'manage_token', 'customer_id', 'service_id', 'aircon_unit_type_id', 'unit_type', 'quantity',
+        'reference', 'manage_token', 'customer_id', 'user_id', 'service_id', 'aircon_unit_type_id', 'unit_type', 'quantity',
         'unit_price_centavos',
         'starts_at', 'ends_at', 'status', 'payment_status', 'source', 'subtotal_centavos',
         'travel_fee_centavos', 'total_centavos', 'technician_share_centavos', 'gross_centavos', 'address_line', 'barangay', 'city',

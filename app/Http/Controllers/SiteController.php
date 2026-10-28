@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\AirconUnitType;
 use App\Models\Service;
+use App\Models\FaqEntry;
 use Illuminate\View\View;
 
 class SiteController extends Controller
@@ -23,6 +24,7 @@ class SiteController extends Controller
         return view('pages.'.$page, [
             'service' => Service::bookable()->firstOrFail(),
             'unitTypes' => AirconUnitType::bookable()->get(),
+            'faqs' => $page === 'faq' ? FaqEntry::where('is_published', true)->orderBy('sort_order')->orderBy('id')->get() : collect(),
         ]);
     }
 }

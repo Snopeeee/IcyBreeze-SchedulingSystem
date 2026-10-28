@@ -202,21 +202,29 @@ class ApiIntegrationsTest extends TestCase
     public function test_admin_forecast_uses_openweather_response(): void
     {
         config()->set('integrations.openweather.api_key', 'weather-test');
-        Http::fake(['api.openweathermap.org/*' => Http::response([
+        Http::fake([
+            'api.openweathermap.org/*' => Http::response([
             'list' => [[
                 'dt' => now()->startOfDay()->addHours(13)->timestamp,
                 'main' => ['temp' => 29.4],
                 'pop' => 0.3,
                 'weather' => [['description' => 'light rain']],
             ]],
-        ], 200)]);
+            ], 200),
+            'air-quality-api.open-meteo.com/*' => Http::response(['current' => ['us_aqi' => 42, 'pm2_5' => 8.2, 'time' => now()->toIso8601String()]], 200),
+            'date.nager.at/*' => Http::response([['date' => now()->addDays(2)->format('Y-m-d'), 'localName' => 'Test Holiday']], 200),
+            'api.sunrise-sunset.org/*' => Http::response(['sunrise' => '2026-10-28T05:30:00+08:00', 'sunset' => '2026-10-28T17:30:00+08:00'], 200),
+        ]);
 
         $this->actingAs(User::factory()->create(['role' => 'admin']))
             ->get('/admin/integrations')->assertOk()
             ->assertSee('OpenWeather')
             ->assertSee('API Integrations')
-            ->assertSee('30% chance of rain');
-        Http::assertSentCount(1);
+            ->assertSee('30% chance of rain')
+            ->assertSee('AQI 42')
+            ->assertSee('Test Holiday')
+            ->assertSee('Sunset 5:30 PM');
+        Http::assertSentCount(4);
     }
 
     private function enablePaypal(): void

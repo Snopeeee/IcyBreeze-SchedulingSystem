@@ -95,9 +95,23 @@ League Spartan Bold (700) is used for headings and display figures. Poppins Regu
 
 The public site reads the official contact, location, social, and operating-hour details from `config/business.php`. The defaults match the IcyBreeze Facebook profile: Tambacan, Iligan City; 0967 873 0654; icybreezeaccleaning@gmail.com; Facebook `icybreezeac`; and Instagram `@icybreezeph`. Each value can be changed later through the corresponding `BUSINESS_*` environment variable without editing page templates.
 
-## Five optional API integrations
+## Final-project features and external APIs
 
-The application supports PayPal, Resend, Twilio, Google Maps Geocoding, and OpenWeather. Configure each in `.env` for local PHP or Docker, or in Railway service variables. The admin **API Integrations** page shows configuration state without exposing keys. Unconfigured services do not make external requests.
+Customer accounts can register, sign in, book while signed in, and see only the appointments made under that account. Earlier guest appointments retain their private management links and are not automatically claimed by an unverified email address. Administrators have a complete FAQ create/read/update/delete workflow; published answers appear on the public FAQ page. Booking, payments, service prices, and the admin dashboard continue to use the application database.
+
+The admin **API Integrations** page uses five external APIs for service planning. It does not expose credentials, send private customer addresses to public mapping services, or let an API outage alter stored bookings.
+
+| API | Purpose | Access |
+| --- | --- | --- |
+| OpenWeather | Rain and temperature forecast for Iligan service windows | API key in `OPENWEATHER_API_KEY` |
+| Open-Meteo Air Quality | Current outdoor AQI and PM2.5 advisory | Keyless non-commercial school demo; attribution shown |
+| Nager.Date | Philippine public-holiday awareness | Keyless |
+| Sunrise-Sunset.org | Daylight times for afternoon service planning | Keyless; attribution shown |
+| OpenStreetMap Nominatim | Admin-initiated, public Iligan City service-area check | Keyless; cached and rate-limited, with attribution |
+
+Nominatim is queried only on an admin action, at most once per minute per user, and only with the city name—never a customer's street address. The result must fall within the Iligan area before it is shown. The public Open-Meteo endpoint is limited to non-commercial educational use and should be replaced with a commercial license or another source before commercial operation.
+
+The original credentialed integrations remain available for later setup: PayPal, Resend, Twilio, and Google Maps Geocoding. Configure them in `.env` for local PHP or Docker, or in Railway service variables. Unconfigured services do not make external requests.
 
 | Provider | Purpose | Required variables |
 | --- | --- | --- |
@@ -107,7 +121,7 @@ The application supports PayPal, Resend, Twilio, Google Maps Geocoding, and Open
 | Google Maps | Admin-initiated address lookup | `GOOGLE_MAPS_GEOCODING_KEY` |
 | OpenWeather | Cached Iligan forecast in admin | `OPENWEATHER_API_KEY` |
 
-Every booking still creates a cash-after-service payment record. When PayPal is configured, the customer can choose online payment from the private booking page. The server creates and captures a PayPal order, then verifies its appointment reference, currency, amount, and completed capture before marking the payment paid. In production, PayPal is shown only with `PAYPAL_MODE=live` and live merchant credentials. Sandbox credentials are for local testing. If PayPal is unconfigured, cash remains the available method. If the customer return flow is interrupted after capture, an admin can verify the pending order with PayPal on the Payments page. An admin can switch an uncaptured PayPal order back to cash after the provider confirms it has no capture. PayPal refunds and automated webhook reconciliation are not included yet.
+Every booking still creates a cash-after-service payment record. When PayPal is configured in a **non-production** environment, the customer can test online payment from the private booking page using `PAYPAL_MODE=sandbox` and a PayPal sandbox buyer account. The server creates and captures a PayPal order, then verifies its appointment reference, currency, amount, and completed capture before marking the test payment paid. This is test money only; do not use the sandbox for real customer payments. In production, PayPal is shown only with `PAYPAL_MODE=live` and live merchant credentials. If PayPal is unconfigured, cash remains the available method. If the customer return flow is interrupted after capture, an admin can verify the pending order with PayPal on the Payments page. An admin can switch an uncaptured PayPal order back to cash after the provider confirms it has no capture. PayPal refunds and automated webhook reconciliation are not included yet.
 
 Resend requires a verified sending domain. Twilio requires an approved sender and may require a verified test recipient on trial accounts. Google Maps Geocoding requires a Google Cloud project with billing enabled. OpenWeather requires its own API key. These providers may charge for usage. The address lookup runs only when an admin requests it and does not store coordinates or track the customer.
 

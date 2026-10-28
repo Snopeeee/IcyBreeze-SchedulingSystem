@@ -11,7 +11,7 @@ class AdminAuthController extends Controller
 {
     public function showLogin(): View|RedirectResponse
     {
-        return Auth::check() ? redirect()->route('admin.dashboard') : view('admin.login');
+        return Auth::check() ? redirect()->route(Auth::user()->isAdmin() ? 'admin.dashboard' : 'customer.dashboard') : view('admin.login');
     }
 
     public function login(Request $request): RedirectResponse
