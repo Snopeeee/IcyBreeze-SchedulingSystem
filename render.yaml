@@ -37,20 +37,6 @@ services:
         value: "true"
       - key: PAYPAL_MODE
         value: sandbox
-      - key: PAYPAL_CLIENT_ID
-        sync: false
-      - key: PAYPAL_CLIENT_SECRET
-        sync: false
-      - key: OPENWEATHER_API_KEY
-        sync: false
-      - key: GOOGLE_CALENDAR_CLIENT_ID
-        sync: false
-      - key: GOOGLE_CALENDAR_CLIENT_SECRET
-        sync: false
-      - key: ADMIN_EMAIL
-        sync: false
-      - key: ADMIN_PASSWORD
-        sync: false
 
 databases:
   - name: icybreeze-school-demo-db
