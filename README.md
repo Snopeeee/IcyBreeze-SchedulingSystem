@@ -1,6 +1,6 @@
 # IcyBreeze Scheduling System
 
-A Laravel 12 scheduling and operations system for IcyBreeze Aircon Cleaning in Iligan City. Laravel owns the public website, appointment and subscription records, administration, and reporting. The active areas are the public customer website and the secure admin dashboard. Local PHP and Docker can share XAMPP MySQL; the Railway deployment uses its own MySQL service. WordPress is not part of this application.
+A Laravel 12 scheduling and operations system for IcyBreeze Aircon Cleaning in Iligan City. Laravel powers the public website, customer accounts, appointments, administration, and reporting. Local PHP and Docker can share XAMPP MySQL. The hosted Render service uses separate PostgreSQL storage. WordPress is not part of this application. For current operating instructions, read [SYSTEM_GUIDE.txt](SYSTEM_GUIDE.txt).
 
 ## Included features
 
@@ -91,13 +91,13 @@ docker compose down
 
 Do not use `docker compose down -v` unless you intentionally want to delete Docker-managed application storage and the generated container application key. MySQL data remains managed by XAMPP.
 
-## Short-lived Render presentation deployment
+## Hosted Render deployment
 
-`render.yaml` describes a separate free Docker web service and free PostgreSQL database for a school demonstration. It does **not** migrate or overwrite the XAMPP MySQL database. Render's free PostgreSQL database expires after 30 days and has no backups; do not use it for real customer records. The free web service can sleep when idle, so allow time for its first request before presenting.
+`render.yaml` describes a separate free Docker web service and free PostgreSQL database. It does **not** migrate or overwrite the XAMPP MySQL database. Render's free PostgreSQL database expires after 30 days and has no backups; do not use it for permanent customer records. The free web service can sleep when idle, so allow time for its first request.
 
-Create a Render Blueprint from this repository and select the branch containing `render.yaml`. The Blueprint generates a persistent app encryption key and links the private PostgreSQL URL. After the initial web-service deployment, add `ADMIN_EMAIL` and a new strong `ADMIN_PASSWORD` privately in the Render service's Environment page; do not share the password in chat or Git. Add the PayPal **Sandbox** `PAYPAL_CLIENT_ID` and `PAYPAL_CLIENT_SECRET`, `OPENWEATHER_API_KEY`, `GOOGLE_CALENDAR_CLIENT_ID`, and `GOOGLE_CALENDAR_CLIENT_SECRET` there too. Redeploy so the first administrator is created and the integrations can be verified. The hosted app is marked as a demo and uses `APP_ENV=staging`, `APP_DEBUG=false`, and `PAYPAL_MODE=sandbox` so test payments cannot be confused with live payments.
+Create a Render Blueprint from this repository and select the branch containing `render.yaml`. The Blueprint generates a persistent app encryption key and links the private PostgreSQL URL. After the initial web-service deployment, add `ADMIN_EMAIL` and a new strong `ADMIN_PASSWORD` privately in the Render service's Environment page; do not share the password in chat or Git. Add the PayPal **Sandbox** `PAYPAL_CLIENT_ID` and `PAYPAL_CLIENT_SECRET`, `OPENWEATHER_API_KEY`, `GOOGLE_CALENDAR_CLIENT_ID`, and `GOOGLE_CALENDAR_CLIENT_SECRET` there too. Redeploy so the first administrator is created and the integrations can be verified. The hosted app uses `APP_ENV=staging`, `APP_DEBUG=false`, and `PAYPAL_MODE=sandbox`; Sandbox checkout must remain clearly identified and must not be confused with live payments.
 
-After Render assigns a `*.onrender.com` hostname, add its exact `https://.../admin/integrations/google-calendar/callback` URI to the Google Cloud OAuth Web client. Sign in to the demo administrator account and reconnect Google Calendar; the local refresh token does not transfer. Verify all five integrations on `/admin/integrations` against the hosted environment. Before any real launch, move to durable database hosting, set `APP_ENV=production`, disable Sandbox checkout, review security and backups, and replace the educational keyless API usage as needed.
+After Render assigns a `*.onrender.com` hostname, add its exact `https://.../admin/integrations/google-calendar/callback` URI to the Google Cloud OAuth Web client. Sign in to the hosted administrator account and reconnect Google Calendar; the local refresh token does not transfer. Verify all five integrations on `/admin/integrations` against the hosted environment. Before commercial launch, move to durable database hosting, set `APP_ENV=production`, disable Sandbox checkout, review security and backups, and replace keyless API usage as needed.
 
 ## Retired technician module
 
@@ -122,7 +122,7 @@ The admin **API Integrations** page presents exactly five integrations: PayPal S
 | PayPal Sandbox | Test-only payment on a private booking page | Encrypted local Sandbox credentials or `PAYPAL_CLIENT_ID` and `PAYPAL_CLIENT_SECRET` |
 | OpenWeather | Rain and temperature forecast for Iligan service windows | Encrypted local key or `OPENWEATHER_API_KEY` |
 | Google Calendar | Administrator-authorized appointment sync | OAuth client and admin consent |
-| Open-Meteo Air Quality | Current outdoor AQI and PM2.5 advisory | Keyless non-commercial school demo; attribution shown |
+| Open-Meteo Air Quality | Current outdoor AQI and PM2.5 advisory | Keyless non-commercial use; attribution shown |
 | OpenStreetMap Nominatim | Admin-initiated, public Iligan City service-area check | Keyless; cached and rate-limited, with attribution |
 
 Nominatim is queried only on an admin action, at most once per minute per user, and only with the city name—never a customer's street address. The result must fall within the Iligan area before it is shown. The public Open-Meteo endpoint is limited to non-commercial educational use and should be replaced with a commercial license or another source before commercial operation.
@@ -133,7 +133,7 @@ Google Calendar uses a separate OAuth Web client. In Google Cloud, enable the Go
 
 Every booking still creates a cash-after-service payment record. When PayPal is configured in a **non-production** environment, the customer can test online payment from the private booking page using `PAYPAL_MODE=sandbox` and a PayPal Sandbox buyer account. The server creates and captures a test order, then verifies its appointment reference, currency, amount, and completed capture before marking the test payment paid. This is test money only; Sandbox checkout is disabled in production. If PayPal is unconfigured or unreachable, cash remains available. The administrator can verify the Sandbox credentials without creating an order from the API Integrations page. If the customer return flow is interrupted after capture, an admin can verify the pending order with PayPal on the Payments page. An admin can switch an uncaptured PayPal order back to cash after the provider confirms it has no capture. PayPal refunds and automated webhook reconciliation are not included yet.
 
-For a local presentation, open `/admin/integrations` after administrator sign-in. The page shows all five selected services. Use **Verify Sandbox connection** to test PayPal credentials without making a payment; review the three OpenWeather forecast windows; use **Verify access** for Google Calendar without changing events; read the Open-Meteo AQI; and use **Verify Iligan City** for the OpenStreetMap lookup. To demonstrate Sandbox checkout, create a test booking and use its private management page with a Sandbox buyer account. Do not use a real customer booking or real PayPal account for this test.
+To check the integrations, open `/admin/integrations` after administrator sign-in. Use **Verify Sandbox connection** to test PayPal credentials without making a payment; review the three OpenWeather forecast windows; use **Verify access** for Google Calendar without changing events; read the Open-Meteo AQI; and use **Verify Iligan City** for the OpenStreetMap lookup. To exercise Sandbox checkout, create a test booking and use its private management page with a Sandbox buyer account. Do not use a real customer booking or real PayPal account for this test.
 
 ## Test
 

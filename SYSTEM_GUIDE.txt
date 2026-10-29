@@ -1,0 +1,112 @@
+ICY BREEZE — SYSTEM GUIDE
+=========================
+
+What the system does
+--------------------
+Icy Breeze is a Laravel/PHP appointment system for aircon cleaning in Iligan City.
+It has a public website, customer accounts, an administrator portal, and a database.
+WordPress is not used. Local development can use XAMPP MySQL; the hosted site has
+its own PostgreSQL database on Render. Records do not automatically sync between
+those databases.
+
+Customer journey
+----------------
+1. Open the website, review services and prices, and choose Book a Cleaning.
+2. Select the aircon unit type and quantity. The price is based on unit type.
+3. Choose an available date and one of the 9:00 AM, 1:00 PM, or 4:00 PM slots.
+   The calendar distinguishes available, reserved, and in-progress slots.
+   Sundays are closed. The server checks availability again at submission.
+4. Enter contact details, an Iligan City address, barangay, and a nearby landmark.
+5. Review and submit. The system saves the appointment and a payment record.
+6. Use the private booking link to see status, cancel within the allowed window,
+   or use the PayPal Sandbox checkout if enabled. Customers can also create an
+   account to see appointments made while signed in.
+
+Administrator journey
+---------------------
+1. Sign in at /admin/login. The account email is admin@icybreeze.local.
+   The password is set privately in the local database or Render Environment.
+   It is not stored in this guide or in Git.
+2. Dashboard: review appointments, revenue, and activity graphs.
+3. Appointments: review, confirm, reschedule, update status, and manually sync
+   an appointment to Google Calendar.
+4. Payments: record cash after service or verify a pending PayPal Sandbox order.
+   A PayPal payment becomes paid only after PayPal confirms a matching completed
+   capture. Do not collect a second payment while a capture is under review.
+5. Services, Customers, FAQs: manage prices and service copy, customer records,
+   and published FAQ entries. Maintenance plans are marked Coming Soon.
+6. API Integrations: view and verify the five provider connections.
+
+The five APIs
+-------------
+1. PayPal Sandbox — test checkout. No real money is charged. The system checks
+   the booking reference, PHP currency, exact amount, and completed capture.
+   A PENDING_REVIEW capture stays unpaid; the retry button is hidden until the
+   administrator verifies the order. Sandbox checkout is disabled in production.
+2. OpenWeather — rain and temperature forecast for Iligan service planning.
+3. Google Calendar — OAuth connection. The administrator can verify access and
+   manually sync a booking reference, time, and status. Customer contact and
+   address details are not sent in the event.
+4. Open-Meteo Air Quality — outdoor AQI and PM2.5 for Iligan. This is not an
+   indoor measurement. Observe the provider's non-commercial use terms.
+5. OpenStreetMap Nominatim — on-demand Iligan City lookup. Customer street
+   addresses are not sent. Use the Verify Iligan City action in the admin page.
+
+Local operation
+---------------
+Project: C:\xampp\htdocs\SchedulingSystem
+Start XAMPP MySQL. In PowerShell, from the project folder:
+
+  C:\xampp\php\php.exe artisan migrate --seed
+  npm install
+  npm run build
+  C:\xampp\php\php.exe artisan serve --host=127.0.0.1 --port=8000
+
+Website: http://127.0.0.1:8000
+Administrator: http://127.0.0.1:8000/admin/login
+
+The local .env must contain the XAMPP MySQL connection. API credentials can be
+configured in .env or through the signed local setup screens. Never put .env,
+provider secrets, or passwords in Git or screenshots. Docker can run the same
+Laravel application with `docker compose up --build -d` while XAMPP MySQL runs.
+
+Hosted operation
+----------------
+Website: https://icybreeze-school-demo.onrender.com
+Administrator: https://icybreeze-school-demo.onrender.com/admin/login
+The Render web service runs Laravel in Docker. Its PostgreSQL database is
+separate from local MySQL. The free Render database has limited lifetime and no
+backups; do not rely on it for permanent customer records. The free web service
+may need time to wake after inactivity.
+
+For an update: run tests and build locally, commit and push the branch, then
+deploy that exact commit in Render. Check the Render deploy status and the
+hosted /admin/integrations page after it becomes Live. Secrets stay in Render
+Environment, not Git. Google Calendar's hosted OAuth callback is:
+
+  https://icybreeze-school-demo.onrender.com/admin/integrations/google-calendar/callback
+
+This callback must stay authorized in the Google Cloud OAuth client. If the
+domain changes, update the authorized redirect URI and reconnect the calendar.
+
+Important payment state
+-----------------------
+PayPal Sandbox can report PENDING_REVIEW after a capture request. That is not
+a completed payment. Keep the booking's payment status pending. The admin may
+use Verify PayPal on the Payments page later; only a matching COMPLETED capture
+is marked paid. Cash-after-service remains the fallback. Do not use Sandbox
+credentials for real customer payments.
+
+Verification
+------------
+Run `C:\xampp\php\php.exe artisan test` from the project folder. For a live
+check, open the hosted website and /admin/integrations, verify the weather and
+air-quality cards, use Verify access for Google Calendar, Verify Iligan City
+for OpenStreetMap, and Verify Sandbox connection for PayPal. The PayPal check
+only requests an access token; it does not create an order or charge.
+
+Before commercial launch
+------------------------
+Move to durable database hosting with backups, review customer privacy and
+provider terms, remove test data, configure real payment credentials only after
+business approval, and test end-to-end payment capture and recovery separately.

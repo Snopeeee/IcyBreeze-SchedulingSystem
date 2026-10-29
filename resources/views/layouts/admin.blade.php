@@ -4,7 +4,6 @@
 <body class="admin-body">
 <a class="skip-link" href="#main-content">Skip to content</a>
 @if (app()->environment('staging'))
-<div class="demo-notice" role="status">School presentation demo · Test data only · PayPal Sandbox is not a live payment method</div>
 @endif
 <div class="admin-shell">
     <aside class="admin-sidebar">

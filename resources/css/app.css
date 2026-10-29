@@ -6074,13 +6074,37 @@ body.site-body {
 .faq-form-card { max-width: 780px; padding: 30px; }
 .integration-card small { display: block; margin-top: 15px; color: #55748a; line-height: 1.5; }
 .integration-card small a { color: var(--navy); text-decoration: underline; }
-/* Keep non-production payment and booking status visible on every page. */
-.demo-notice {
-    padding: .65rem 1rem;
-    background: #fdd95b;
-    color: #185079;
-    text-align: center;
-    font-weight: 700;
-    font-size: .9rem;
-    line-height: 1.4;
+/* Keep desktop navigation readable; switch to the menu before links collide. */
+@media (min-width: 1140px) {
+    .nav-inner { grid-template-columns: 185px minmax(0, 1fr) 170px; gap: 12px; }
+    .brand img { width: 180px; }
+    .site-nav { display: contents; }
+    .site-nav-links { grid-column: 2; justify-self: center; display: flex; flex-wrap: nowrap; gap: 2px; min-width: 0; }
+    .site-nav-links > a { padding: 10px 8px; font-size: 12px; white-space: nowrap; }
+    .site-nav .nav-cta { grid-column: 3; justify-self: end; min-height: 44px; padding-inline: 12px; font-size: 12px; white-space: nowrap; }
+}
+
+@media (max-width: 1139px) {
+    .nav-inner { display: flex; align-items: center; justify-content: space-between; }
+    .menu-toggle { display: grid; place-items: center; flex: 0 0 44px; }
+    .site-nav {
+        display: none;
+        position: absolute;
+        top: calc(100% - 1px);
+        left: 20px;
+        right: 20px;
+        z-index: 70;
+        padding: 14px;
+        border: 1px solid var(--line);
+        border-radius: 0 0 16px 16px;
+        background: #fff;
+        box-shadow: var(--shadow);
+        flex-direction: column;
+        align-items: stretch;
+        gap: 5px;
+    }
+    .site-nav.is-open { display: flex; }
+    .site-nav-links { display: grid; gap: 3px; width: 100%; }
+    .site-nav-links > a { width: 100%; padding: 12px 14px; white-space: normal; }
+    .site-nav .nav-cta { width: 100%; justify-content: center; margin-top: 4px; }
 }

@@ -21,6 +21,11 @@ class PayPalPaymentController extends Controller
         abort_if(in_array($appointment->status, ['cancelled', 'no_show'], true), 422);
         abort_if($appointment->payment_status === 'paid', 422, 'This appointment has already been paid.');
 
+        if (Payment::where('appointment_id', $appointment->id)->first()?->isSandboxReviewPending()) {
+            return redirect()->route('booking.manage', $token)
+                ->with('error', 'PayPal is still reviewing this Sandbox payment. Please do not try to pay again.');
+        }
+
         try {
             $approvalUrl = DB::transaction(function () use ($appointment, $paypal): string {
                 $payment = Payment::where('appointment_id', $appointment->id)->lockForUpdate()->firstOrFail();
@@ -73,6 +78,17 @@ class PayPalPaymentController extends Controller
             return redirect()->route('booking.manage', $token)->with('success', 'Your PayPal payment is confirmed.');
         } catch (Throwable $error) {
             Log::error('PayPal payment requires reconciliation.', ['appointment_id' => $appointment->id, 'order_id' => $orderId, 'error' => $error->getMessage()]);
+
+            if (str_contains($error->getMessage(), 'pending review')) {
+                Payment::where('appointment_id', $appointment->id)
+                    ->where('provider', 'paypal')
+                    ->where('reference', $orderId)
+                    ->where('status', 'pending')
+                    ->update(['notes' => 'PayPal Sandbox capture is pending review. Awaiting completion.']);
+
+                return redirect()->route('booking.manage', $token)
+                    ->with('error', 'PayPal is reviewing this Sandbox payment. Your booking is still unpaid; please do not pay again.');
+            }
 
             return redirect()->route('booking.manage', $token)->with('error', 'Payment could not be confirmed yet. Please contact our office before trying another payment.');
         }

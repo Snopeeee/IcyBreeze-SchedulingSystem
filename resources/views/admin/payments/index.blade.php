@@ -18,6 +18,7 @@
             <td>
                 @if($payment->provider === 'paypal')
                     <span class="status-badge status-{{ $payment->status }}">{{ Str::title($payment->status) }}</span>
+                    @if($payment->isSandboxReviewPending())<small>PayPal review pending. Do not collect another payment.</small>@endif
                     @if($payment->status === 'pending' && app(\App\Integrations\PayPalCheckout::class)->available())
                         <form method="POST" action="{{ route('admin.payments.verify-paypal', $payment) }}" style="margin-top:6px">@csrf<button class="button button-ghost button-small" type="submit">Verify with PayPal</button></form>
                         <form method="POST" action="{{ route('admin.payments.switch-to-cash', $payment) }}" style="margin-top:6px" onsubmit="return confirm('Check that no PayPal payment was captured before switching to cash?')">@csrf<button class="button button-ghost button-small" type="submit">Switch to cash</button></form>

@@ -45,7 +45,7 @@ class ApiIntegrationsTest extends TestCase
             'api-m.sandbox.paypal.com/v2/checkout/orders/ORDER-123/capture' => Http::response($this->capture($appointment), 201),
         ]);
 
-        $this->get('/manage-booking/'.$appointment->manage_token)->assertOk()->assertSee('PayPal Sandbox test checkout');
+        $this->get('/manage-booking/'.$appointment->manage_token)->assertOk()->assertSee('PayPal Sandbox checkout');
         $this->post('/manage-booking/'.$appointment->manage_token.'/paypal')
             ->assertRedirect('https://www.sandbox.paypal.com/checkoutnow?token=ORDER-123');
         $this->assertDatabaseHas('payments', ['appointment_id' => $appointment->id, 'provider' => 'paypal', 'status' => 'pending']);
@@ -104,7 +104,14 @@ class ApiIntegrationsTest extends TestCase
         $this->get('/manage-booking/'.$appointment->manage_token.'/paypal/return?token=ORDER-123')->assertRedirect();
         $this->assertSame('pending', $appointment->fresh()->payment_status);
         $this->assertSame('pending', Payment::firstOrFail()->status);
-        $this->get('/manage-booking/'.$appointment->manage_token)->assertOk()->assertSee('PayPal Sandbox test checkout');
+        $this->assertTrue(Payment::firstOrFail()->isSandboxReviewPending());
+        $this->get('/manage-booking/'.$appointment->manage_token)
+            ->assertOk()
+            ->assertSee('PayPal Sandbox review pending')
+            ->assertDontSee('Try Sandbox payment');
+        $this->post('/manage-booking/'.$appointment->manage_token.'/paypal')
+            ->assertRedirect()
+            ->assertSessionHas('error', 'PayPal is still reviewing this Sandbox payment. Please do not try to pay again.');
     }
 
     public function test_admin_can_reconcile_a_completed_paypal_order_after_an_interrupted_return(): void
@@ -128,6 +135,38 @@ class ApiIntegrationsTest extends TestCase
 
         $this->assertSame('paid', $payment->fresh()->status);
         $this->assertSame('paid', $appointment->fresh()->payment_status);
+    }
+
+    public function test_admin_verification_keeps_a_paypal_review_pending_and_blocks_customer_retry(): void
+    {
+        $this->seed();
+        $this->post('/book', $this->bookingData())->assertRedirect();
+        $appointment = Appointment::firstOrFail();
+        $this->enablePaypal();
+        $payment = Payment::firstOrFail();
+        $payment->update(['method' => 'paypal', 'provider' => 'paypal', 'reference' => 'ORDER-123', 'status' => 'pending']);
+        $appointment->update(['payment_status' => 'pending']);
+        $capture = $this->capture($appointment);
+        $capture['purchase_units'][0]['payments']['captures'][0]['status'] = 'PENDING';
+        $capture['purchase_units'][0]['payments']['captures'][0]['status_details'] = ['reason' => 'PENDING_REVIEW'];
+
+        Http::fake([
+            'api-m.sandbox.paypal.com/v1/oauth2/token' => Http::response(['access_token' => 'test-access'], 200),
+            'api-m.sandbox.paypal.com/v2/checkout/orders/ORDER-123' => Http::response($capture, 200),
+        ]);
+
+        $this->actingAs(User::factory()->create(['role' => 'admin']))
+            ->post('/admin/payments/'.$payment->id.'/verify-paypal')
+            ->assertRedirect()
+            ->assertSessionHasErrors('paypal');
+
+        $this->assertSame('pending', $payment->fresh()->status);
+        $this->assertSame('pending', $appointment->fresh()->payment_status);
+        $this->assertTrue($payment->fresh()->isSandboxReviewPending());
+        $this->get('/manage-booking/'.$appointment->manage_token)
+            ->assertOk()
+            ->assertSee('PayPal Sandbox review pending')
+            ->assertDontSee('Try Sandbox payment');
     }
 
     public function test_admin_can_switch_an_uncaptured_paypal_order_back_to_cash(): void

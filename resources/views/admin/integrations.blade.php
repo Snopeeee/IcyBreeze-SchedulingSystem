@@ -4,9 +4,9 @@
 @section('content')
 <div class="admin-top">
     <div>
-        <span class="admin-eyebrow">Five essential services</span>
+        <span class="admin-eyebrow">Connected services</span>
         <h1>API Integrations</h1>
-        <p>Payments, weather, scheduling, air quality, and service-area verification work alongside the IcyBreeze booking system. Appointments and payment records remain in our own database.</p>
+        <p>Manage payments, forecasts, calendar access, air quality, and service-area checks.</p>
     </div>
 </div>
 
@@ -24,8 +24,8 @@
 
 <div class="integration-detail-grid">
     <section class="admin-card integration-forecast">
-        <div class="admin-card-header"><div><span class="admin-eyebrow">01 · Payment</span><h2>PayPal Sandbox</h2></div><span>Test transactions only</span></div>
-        <p>Customers can try the PayPal payment flow from their private booking page using a Sandbox buyer account. No real money is charged, and Sandbox checkout is disabled in production.</p>
+        <div class="admin-card-header"><div><span class="admin-eyebrow">01 · Payment</span><h2>PayPal Sandbox</h2></div><span>No real charges</span></div>
+        <p>Customers can use a Sandbox buyer account from their private booking page. Checkout is disabled in production.</p>
         @if($paypalConfigured)
             <form method="POST" action="{{ route('admin.integrations.verify-paypal') }}">@csrf<button class="button button-navy button-small" type="submit">Verify Sandbox connection</button></form>
             <small class="integration-source-note">Verification requests an access token only. It does not create an order or charge.</small>
@@ -54,7 +54,7 @@
 
     <section class="admin-card integration-forecast">
         <div class="admin-card-header"><div><span class="admin-eyebrow">03 · Scheduling</span><h2>Google Calendar</h2></div><span class="status-badge {{ $calendarConnected ? 'status-paid' : 'status-pending' }}">{{ $calendarConnected ? 'Connected' : ($calendarConfigured ? 'Authorization needed' : 'Not configured') }}</span></div>
-        <p>After reviewing an appointment, an administrator can sync its booking reference and time to the connected calendar. Customer contact details and addresses are never included in the event.</p>
+        <p>Sync a booking reference and schedule to the connected calendar. Customer contact details and addresses stay private.</p>
         @if($calendarConfigured)
             <div class="integration-actions">
                 <form method="POST" action="{{ route('admin.google-calendar.connect') }}">@csrf<button class="button button-navy button-small" type="submit">{{ $calendarConnected ? 'Reconnect Calendar' : 'Connect Calendar' }}</button></form>
@@ -70,11 +70,11 @@
         <div class="admin-card-header"><div><span class="admin-eyebrow">04 · Air quality</span><h2>Open-Meteo Air Quality</h2></div><span>Iligan City</span></div>
         @if($airQuality)
             <p class="integration-key-metric">AQI {{ $airQuality['aqi'] }} <span>· PM2.5 {{ $airQuality['pm25'] }} µg/m³</span></p>
-            <p>Outdoor conditions help the team plan service visits. This is an outdoor estimate, not a measurement of air quality inside a customer's home.</p>
+            <p>Outdoor conditions support service planning. This is not an indoor air-quality measurement.</p>
         @else
             <p>Air-quality data is temporarily unavailable. Existing bookings are unaffected.</p>
         @endif
-        <small class="integration-source-note">Data: <a href="https://open-meteo.com/en/docs/air-quality-api" target="_blank" rel="noopener noreferrer">Open-Meteo / CAMS ENSEMBLE</a>. Non-commercial educational use only.</small>
+        <small class="integration-source-note">Data: <a href="https://open-meteo.com/en/docs/air-quality-api" target="_blank" rel="noopener noreferrer">Open-Meteo / CAMS ENSEMBLE</a>. Non-commercial use only.</small>
     </section>
 
     <section class="admin-card integration-forecast">
@@ -88,5 +88,5 @@
     </section>
 </div>
 
-<p class="integration-help">Private credentials are stored in encrypted local settings or environment variables and are never displayed here. External-service interruptions do not erase or change stored appointments.</p>
+<p class="integration-help">Private credentials are hidden. API outages do not affect saved appointments.</p>
 @endsection

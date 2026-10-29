@@ -48,6 +48,12 @@ class AdminPaymentController extends Controller
         } catch (Throwable $error) {
             Log::warning('PayPal payment verification failed.', ['payment_id' => $payment->id, 'error' => $error->getMessage()]);
 
+            if (str_contains($error->getMessage(), 'pending review')) {
+                $payment->update(['notes' => 'PayPal Sandbox capture is pending review. Awaiting completion.']);
+
+                return back()->withErrors(['paypal' => 'PayPal is reviewing this Sandbox payment. Verify again later; do not collect a second payment.']);
+            }
+
             return back()->withErrors(['paypal' => 'PayPal has not confirmed a completed payment for this order.']);
         }
     }

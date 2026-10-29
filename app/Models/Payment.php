@@ -32,4 +32,11 @@ class Payment extends Model
     {
         return "\u{20B1}".number_format($this->amount_centavos / 100);
     }
+
+    public function isSandboxReviewPending(): bool
+    {
+        return $this->provider === 'paypal'
+            && $this->status === 'pending'
+            && str_contains((string) $this->notes, 'pending review');
+    }
 }

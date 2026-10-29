@@ -43,9 +43,6 @@
 </head>
 <body class="site-body">
     <a class="skip-link" href="#main-content">Skip to content</a>
-    @if (app()->environment('staging'))
-        <div class="demo-notice" role="status">School presentation demo · Appointments are test records · PayPal uses Sandbox only; no real payments</div>
-    @endif
     <div class="topbar">
         <div class="site-shell topbar-inner">
             <div class="topbar-contact">
@@ -68,13 +65,13 @@
             <nav class="site-nav" id="site-menu" data-site-menu>
                 <div class="site-nav-links">
                     <a class="{{ request()->routeIs('services') ? 'is-active' : '' }}" href="{{ route('services') }}">Services</a>
-                    <a class="{{ request()->routeIs('how') ? 'is-active' : '' }}" href="{{ route('how') }}">Service Process</a>
-                    <a class="{{ request()->routeIs('subscriptions.*') ? 'is-active' : '' }}" href="{{ route('subscriptions.create') }}">Maintenance Plans <span class="nav-status">Soon</span></a>
+                    <a class="{{ request()->routeIs('how') ? 'is-active' : '' }}" href="{{ route('how') }}">How It Works</a>
+                    <a class="{{ request()->routeIs('subscriptions.*') ? 'is-active' : '' }}" href="{{ route('subscriptions.create') }}">Care Plans <span class="nav-status">Soon</span></a>
                     <a class="{{ request()->routeIs('coverage') ? 'is-active' : '' }}" href="{{ route('coverage') }}">Service Area</a>
                     <a class="{{ request()->routeIs('faq') ? 'is-active' : '' }}" href="{{ route('faq') }}">FAQs</a>
-                    <a class="{{ request()->routeIs('customer.*') ? 'is-active' : '' }}" href="{{ route(auth()->check() && !auth()->user()->isAdmin() ? 'customer.dashboard' : 'customer.login') }}">{{ auth()->check() && !auth()->user()->isAdmin() ? 'My Account' : 'Customer Sign In' }}</a>
+                    <a class="{{ request()->routeIs('customer.*') ? 'is-active' : '' }}" href="{{ route(auth()->check() && !auth()->user()->isAdmin() ? 'customer.dashboard' : 'customer.login') }}">{{ auth()->check() && !auth()->user()->isAdmin() ? 'My Account' : 'Sign In' }}</a>
                 </div>
-                <a class="nav-cta" href="{{ route('booking.create') }}"><i class="ph ph-calendar-check"></i> Schedule Service</a>
+                <a class="nav-cta" href="{{ route('booking.create') }}"><i class="ph ph-calendar-check"></i> Book a Cleaning</a>
             </nav>
         </div>
     </header>
