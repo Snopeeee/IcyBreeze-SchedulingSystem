@@ -98,6 +98,10 @@ class PayPalCheckout
     {
         $capture = data_get($response, 'purchase_units.0.payments.captures.0');
         $reference = data_get($response, 'purchase_units.0.custom_id');
+        if (data_get($capture, 'status') === 'PENDING'
+            && data_get($capture, 'status_details.reason') === 'PENDING_REVIEW') {
+            throw new RuntimeException('PayPal Sandbox capture is pending review. Keep the booking unpaid until PayPal reports a completed capture.');
+        }
         if (data_get($response, 'id') !== $orderId
             || data_get($response, 'status') !== 'COMPLETED'
             || $reference !== $appointment->reference

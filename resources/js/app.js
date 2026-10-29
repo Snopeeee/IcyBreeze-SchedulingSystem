@@ -200,7 +200,7 @@ if (wizard) {
             const input = option.querySelector('input');
             const status = option.querySelector('[data-slot-status]');
             const icon = option.querySelector('.time-status-icon i');
-            option.classList.remove('is-available', 'is-reserved', 'is-in_progress');
+            option.classList.remove('is-available', 'is-reserved', 'is-in_progress', 'is-unavailable');
             option.classList.add(`is-${slot.status}`);
             input.disabled = slot.status !== 'available';
             if (input.disabled) input.checked = false;
@@ -216,9 +216,25 @@ if (wizard) {
     };
 
     const refreshAvailability = async () => {
-        const date = wizard.querySelector('[name="appointment_date"]')?.value;
+        const dateField = wizard.querySelector('[name="appointment_date"]');
+        const date = dateField?.value;
         const quantity = wizard.querySelector('[name="quantity"]')?.value || 1;
         if (!date || !wizard.dataset.availabilityUrl || !availabilityRegion) return;
+
+        const isSunday = new Date(`${date}T12:00:00`).getDay() === 0;
+        dateField.setCustomValidity(isSunday ? 'Appointments are available Monday through Saturday. Please select another date.' : '');
+        if (isSunday) {
+            availabilityRequest?.abort();
+            availabilityRegion.setAttribute('aria-busy', 'false');
+            availabilityRegion.classList.remove('is-loading');
+            applyAvailability([...wizard.querySelectorAll('[data-time-option]')].map((option) => ({
+                time: option.dataset.time,
+                status: 'unavailable',
+                status_label: 'Closed on Sundays',
+            })));
+            if (availabilityMessage) availabilityMessage.textContent = 'Sunday appointments are unavailable. Please choose Monday through Saturday.';
+            return;
+        }
 
         availabilityRequest?.abort();
         availabilityRequest = new AbortController();

@@ -170,6 +170,23 @@ class IcyBreezeSystemTest extends TestCase
         $this->assertSame('in_progress', collect($inProgress)->firstWhere('time', '13:00')['status']);
     }
 
+    public function test_sunday_slots_are_closed_and_sunday_bookings_are_rejected(): void
+    {
+        $service = $this->service();
+        $sunday = now()->next('Sunday')->toDateString();
+
+        $slots = $this->getJson('/book/availability?date='.$sunday.'&quantity=1')
+            ->assertOk()
+            ->json('slots');
+        $this->assertSame(['unavailable', 'unavailable', 'unavailable'], array_column($slots, 'status'));
+        $this->assertSame('Closed on Sundays', $slots[0]['status_label']);
+
+        $booking = $this->bookingData($service);
+        $booking['appointment_date'] = $sunday;
+        $this->post('/book', $booking)->assertSessionHasErrors('appointment_date');
+        $this->assertDatabaseCount('appointments', 0);
+    }
+
     public function test_signed_in_customer_can_check_availability_without_sending_an_email_address(): void
     {
         $this->service();

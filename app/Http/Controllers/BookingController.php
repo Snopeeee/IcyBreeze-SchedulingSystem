@@ -16,13 +16,18 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
+use Throwable;
 
 class BookingController extends Controller
 {
     public function create(Request $request): View
     {
         $unitTypes = AirconUnitType::bookable()->get();
-        $date = old('appointment_date', today()->addDays(2)->format('Y-m-d'));
+        $defaultDate = CarbonImmutable::today(config('app.timezone'))->addDays(2);
+        if ($defaultDate->isSunday()) {
+            $defaultDate = $defaultDate->addDay();
+        }
+        $date = old('appointment_date', $defaultDate->format('Y-m-d'));
         $quantity = (int) old('quantity', 1);
 
         return view('booking.create', [
@@ -30,6 +35,7 @@ class BookingController extends Controller
             'unitTypes' => $unitTypes,
             'selectedUnitTypeId' => $unitTypes->firstWhere('id', $request->integer('unit'))?->id ?? $unitTypes->first()?->id,
             'availability' => $this->availabilityFor($date, $quantity),
+            'defaultDate' => $defaultDate->format('Y-m-d'),
         ]);
     }
 
@@ -54,7 +60,15 @@ class BookingController extends Controller
                 Rule::exists('aircon_unit_types', 'id')->where(fn ($query) => $query->where('is_active', true)),
             ],
             'quantity' => ['required', 'integer', 'min:1', 'max:5'],
-            'appointment_date' => ['required', 'date', 'after_or_equal:tomorrow'],
+            'appointment_date' => ['required', 'date', 'after_or_equal:tomorrow', function (string $attribute, mixed $value, $fail): void {
+                try {
+                    if (CarbonImmutable::parse((string) $value)->isSunday()) {
+                        $fail('Appointments are available Monday through Saturday. Please select another date.');
+                    }
+                } catch (Throwable) {
+                    // The date rule reports an invalid date.
+                }
+            }],
             'appointment_time' => ['required', Rule::in(config('scheduling.arrival_times'))],
             'first_name' => ['required', 'string', 'max:80'],
             'last_name' => ['required', 'string', 'max:80'],
@@ -212,6 +226,16 @@ class BookingController extends Controller
 
     private function availabilityFor(string $date, int $quantity): array
     {
+        $closed = CarbonImmutable::parse($date, config('app.timezone'))->isSunday();
+        if ($closed) {
+            return collect(config('scheduling.arrival_times'))->map(fn (string $time) => [
+                'time' => $time,
+                'label' => CarbonImmutable::createFromFormat('H:i', $time)->format('g:i A'),
+                'status' => 'unavailable',
+                'status_label' => 'Closed on Sundays',
+            ])->all();
+        }
+
         $service = Service::bookable()->firstOrFail();
         $duration = $service->duration_minutes + (($quantity - 1) * 45) + $service->buffer_minutes;
         $dayStart = CarbonImmutable::createFromFormat('Y-m-d H:i', $date.' 00:00', config('app.timezone'));
