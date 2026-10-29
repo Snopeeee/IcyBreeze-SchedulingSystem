@@ -39,4 +39,11 @@ class Payment extends Model
             && $this->status === 'pending'
             && str_contains((string) $this->notes, 'pending review');
     }
+
+    public function isPendingPayPalOrder(): bool
+    {
+        return $this->provider === 'paypal'
+            && $this->status === 'pending'
+            && filled($this->reference);
+    }
 }

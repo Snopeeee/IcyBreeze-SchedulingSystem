@@ -21,9 +21,9 @@ class PayPalPaymentController extends Controller
         abort_if(in_array($appointment->status, ['cancelled', 'no_show'], true), 422);
         abort_if($appointment->payment_status === 'paid', 422, 'This appointment has already been paid.');
 
-        if (Payment::where('appointment_id', $appointment->id)->first()?->isSandboxReviewPending()) {
+        if (Payment::where('appointment_id', $appointment->id)->first()?->isPendingPayPalOrder()) {
             return redirect()->route('booking.manage', $token)
-                ->with('error', 'PayPal is still reviewing this Sandbox payment. Please do not try to pay again.');
+                ->with('error', 'This PayPal Sandbox order is awaiting verification. Please do not pay again.');
         }
 
         try {

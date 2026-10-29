@@ -3,6 +3,7 @@
 @section('content')
 @php($paypalPayment = $appointment->payments->firstWhere('provider', 'paypal'))
 @php($paypalPendingReview = $paypalPayment?->isSandboxReviewPending() ?? false)
+@php($paypalPendingOrder = $paypalPayment?->isPendingPayPalOrder() ?? false)
 <section class="booking-page"><div class="site-shell booking-container">
     <div class="booking-header"><span class="eyebrow">Secure appointment access</span><h1>Manage Appointment</h1><p>Appointment reference: {{ $appointment->reference }}</p></div>
     <div class="booking-panel"><div class="booking-layout"><div class="booking-main">
@@ -10,8 +11,8 @@
         @if(session('error'))<div class="flash flash-error" role="alert">{{ session('error') }}</div>@endif
         <h2 class="booking-step-title">{{ $appointment->service->name }}</h2><p class="booking-step-copy">Customer: {{ $appointment->customer->full_name }}</p>
         <div class="review-card"><div class="review-row"><span>Status</span><strong><span class="status-badge status-{{ $appointment->status }}">{{ $appointment->status_label }}</span></strong></div><div class="review-row"><span>Schedule</span><strong>{{ $appointment->starts_at->format('D, M j, Y · g:i A') }}–{{ $appointment->ends_at->format('g:i A') }}</strong></div><div class="review-row"><span>Aircon</span><strong>{{ $appointment->quantity }} {{ Str::plural('unit',$appointment->quantity) }} · {{ $appointment->unit_type }}</strong></div><div class="review-row"><span>Address</span><strong>{{ $appointment->address_line }}, {{ $appointment->barangay }}, {{ $appointment->city }}</strong></div><div class="review-row"><span>Payment</span><strong>{{ $appointment->payment_status_label }} · {{ $appointment->formatted_total }}</strong></div></div>
-        @if($paypalPendingReview)
-            <div class="paypal-payment-option"><div><strong>PayPal Sandbox review pending</strong><p>PayPal has not completed this test payment. Your appointment remains confirmed and unpaid. Please do not pay again while our office verifies the result.</p></div></div>
+        @if($paypalPendingOrder)
+            <div class="paypal-payment-option"><div><strong>{{ $paypalPendingReview ? 'PayPal Sandbox review pending' : 'PayPal Sandbox verification pending' }}</strong><p>Your appointment remains confirmed and unpaid. Please do not pay again while our office verifies this order.</p></div></div>
         @elseif(app(\App\Integrations\PayPalCheckout::class)->available() && !in_array($appointment->status, ['cancelled', 'no_show'], true) && $appointment->payment_status !== 'paid')
             <div class="paypal-payment-option"><div><strong>PayPal Sandbox checkout</strong><p>No real money is charged. Use a Sandbox buyer account. @if($appointment->payment_status === 'pending') Continue the checkout you started. @endif</p></div><form method="POST" action="{{ route('paypal.start', $appointment->manage_token) }}">@csrf<button class="button button-yellow" type="submit">{{ $appointment->payment_status === 'pending' ? 'Continue checkout' : 'Try Sandbox payment' }} <i class="ph ph-arrow-right"></i></button></form></div>
         @endif

@@ -111,7 +111,31 @@ class ApiIntegrationsTest extends TestCase
             ->assertDontSee('Try Sandbox payment');
         $this->post('/manage-booking/'.$appointment->manage_token.'/paypal')
             ->assertRedirect()
-            ->assertSessionHas('error', 'PayPal is still reviewing this Sandbox payment. Please do not try to pay again.');
+            ->assertSessionHas('error', 'This PayPal Sandbox order is awaiting verification. Please do not pay again.');
+    }
+
+    public function test_customer_cannot_restart_an_existing_unverified_paypal_order(): void
+    {
+        $this->seed();
+        $this->post('/book', $this->bookingData())->assertRedirect();
+        $appointment = Appointment::firstOrFail();
+        $this->enablePaypal();
+        Payment::firstOrFail()->update([
+            'method' => 'paypal',
+            'provider' => 'paypal',
+            'reference' => 'ORDER-OLD',
+            'status' => 'pending',
+            'notes' => 'Awaiting PayPal approval and capture.',
+        ]);
+        $appointment->update(['payment_status' => 'pending']);
+
+        $this->get('/manage-booking/'.$appointment->manage_token)
+            ->assertOk()
+            ->assertSee('PayPal Sandbox verification pending')
+            ->assertDontSee('Continue checkout');
+        $this->post('/manage-booking/'.$appointment->manage_token.'/paypal')
+            ->assertRedirect()
+            ->assertSessionHas('error', 'This PayPal Sandbox order is awaiting verification. Please do not pay again.');
     }
 
     public function test_admin_can_reconcile_a_completed_paypal_order_after_an_interrupted_return(): void

@@ -41,7 +41,7 @@ The five APIs
 -------------
 1. PayPal Sandbox — test checkout. No real money is charged. The system checks
    the booking reference, PHP currency, exact amount, and completed capture.
-   A PENDING_REVIEW capture stays unpaid; the retry button is hidden until the
+   A pending order stays unpaid; the retry button is hidden until the
    administrator verifies the order. Sandbox checkout is disabled in production.
 2. OpenWeather — rain and temperature forecast for Iligan service planning.
 3. Google Calendar — OAuth connection. The administrator can verify access and
@@ -92,10 +92,12 @@ domain changes, update the authorized redirect URI and reconnect the calendar.
 Important payment state
 -----------------------
 PayPal Sandbox can report PENDING_REVIEW after a capture request. That is not
-a completed payment. Keep the booking's payment status pending. The admin may
-use Verify PayPal on the Payments page later; only a matching COMPLETED capture
-is marked paid. Cash-after-service remains the fallback. Do not use Sandbox
-credentials for real customer payments.
+a completed payment. Keep the booking's payment status pending and prevent a
+second payment attempt. The admin may use Verify PayPal on the Payments page
+later; only a matching COMPLETED capture is marked paid. An abandoned,
+uncaptured order may be switched back to cash after the admin verifies it with
+PayPal. Cash-after-service remains the fallback. Do not use Sandbox credentials
+for real customer payments.
 
 Verification
 ------------
