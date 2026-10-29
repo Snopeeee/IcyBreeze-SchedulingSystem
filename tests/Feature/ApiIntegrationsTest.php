@@ -155,48 +155,38 @@ class ApiIntegrationsTest extends TestCase
         $this->assertSame('pending', $appointment->fresh()->payment_status);
     }
 
-    public function test_configured_email_and_sms_send_booking_confirmation(): void
+    public function test_admin_can_verify_paypal_sandbox_without_creating_an_order(): void
     {
-        $this->seed();
-        config()->set('integrations.resend.api_key', 'resend-test');
-        config()->set('integrations.resend.from', 'bookings@example.test');
-        config()->set('integrations.twilio.account_sid', 'AC'.str_repeat('1', 32));
-        config()->set('integrations.twilio.auth_token', 'twilio-test');
-        config()->set('integrations.twilio.from', '+15551234567');
-        Http::fake([
-            'api.resend.com/emails' => Http::response(['id' => 'email-1'], 200),
-            'api.twilio.com/*' => Http::response(['sid' => 'SM'.str_repeat('1', 32)], 201),
-        ]);
+        $this->enablePaypal();
+        Http::fake(['api-m.sandbox.paypal.com/v1/oauth2/token' => Http::response(['access_token' => 'test-access'], 200)]);
 
-        $this->post('/book', $this->bookingData())->assertRedirect();
-        Http::assertSentCount(2);
-        Http::assertSent(fn ($request) => str_contains($request->url(), 'api.resend.com/emails')
-            && in_array('mika@example.test', $request['to'], true));
-        Http::assertSent(fn ($request) => str_contains($request->url(), '/Messages.json')
-            && $request['To'] === '+639171234567');
+        $this->post('/admin/integrations/verify-paypal')->assertRedirect('/admin/login');
+        $this->actingAs(User::factory()->create(['role' => 'admin']))
+            ->post('/admin/integrations/verify-paypal')
+            ->assertRedirect()
+            ->assertSessionHas('success', 'PayPal Sandbox credentials verified. No payment or test order was created.');
+
+        Http::assertSentCount(1);
+        Http::assertSent(fn ($request) => str_ends_with($request->url(), '/v1/oauth2/token'));
+        $this->assertDatabaseCount('payments', 0);
     }
 
-    public function test_admin_can_check_an_address_without_saving_location_coordinates(): void
+    public function test_openstreetmap_checks_only_the_public_city(): void
     {
-        $this->seed();
-        $this->post('/book', $this->bookingData())->assertRedirect();
-        $appointment = Appointment::firstOrFail();
-        config()->set('integrations.google_maps.api_key', 'maps-test');
-        Http::fake(['maps.googleapis.com/*' => Http::response([
-            'status' => 'OK',
-            'results' => [[
-                'formatted_address' => 'Pala-o, Iligan City, Philippines',
-                'geometry' => ['location' => ['lat' => 8.228, 'lng' => 124.245]],
-            ]],
+        Http::fake(['nominatim.openstreetmap.org/*' => Http::response([
+            ['lat' => '8.2280', 'lon' => '124.2452', 'display_name' => 'Iligan City, Philippines'],
         ], 200)]);
 
-        $this->post('/admin/appointments/'.$appointment->id.'/lookup-address')->assertRedirect('/admin/login');
+        $this->post('/admin/integrations/verify-service-area')->assertRedirect('/admin/login');
         $this->actingAs(User::factory()->create(['role' => 'admin']))
-            ->post('/admin/appointments/'.$appointment->id.'/lookup-address')
-            ->assertSessionHas('location_result.address', 'Pala-o, Iligan City, Philippines');
-        $this->assertNull($appointment->fresh()->latitude);
-        $this->assertNull($appointment->fresh()->longitude);
+            ->post('/admin/integrations/verify-service-area')
+            ->assertRedirect()
+            ->assertSessionHas('service_area_result.name', 'Iligan City, Philippines');
+
         Http::assertSentCount(1);
+        Http::assertSent(fn ($request) => str_contains($request->url(), 'nominatim.openstreetmap.org/search')
+            && $request['q'] === 'Iligan'
+            && ! str_contains($request->url(), 'Pala-o'));
     }
 
     public function test_admin_forecast_uses_openweather_response(): void
@@ -212,19 +202,19 @@ class ApiIntegrationsTest extends TestCase
             ]],
             ], 200),
             'air-quality-api.open-meteo.com/*' => Http::response(['current' => ['us_aqi' => 42, 'pm2_5' => 8.2, 'time' => now()->toIso8601String()]], 200),
-            'date.nager.at/*' => Http::response([['date' => now()->addDays(2)->format('Y-m-d'), 'localName' => 'Test Holiday']], 200),
-            'api.sunrise-sunset.org/*' => Http::response(['sunrise' => '2026-10-28T05:30:00+08:00', 'sunset' => '2026-10-28T17:30:00+08:00'], 200),
         ]);
 
         $this->actingAs(User::factory()->create(['role' => 'admin']))
             ->get('/admin/integrations')->assertOk()
-            ->assertSee('OpenWeather')
+            ->assertViewHas('integrations', fn ($items) => array_column($items, 'name') === [
+                'PayPal Sandbox', 'OpenWeather', 'Google Calendar', 'Open-Meteo Air Quality', 'OpenStreetMap Nominatim',
+            ])
             ->assertSee('API Integrations')
             ->assertSee('30% chance of rain')
             ->assertSee('AQI 42')
-            ->assertSee('Test Holiday')
-            ->assertSee('Sunset 5:30 PM');
-        Http::assertSentCount(4);
+            ->assertDontSee('Nager.Date')
+            ->assertDontSee('Sunrise-Sunset.org');
+        Http::assertSentCount(2);
     }
 
     private function enablePaypal(): void

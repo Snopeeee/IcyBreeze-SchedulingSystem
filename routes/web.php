@@ -15,6 +15,21 @@ use App\Http\Controllers\AdminIntegrationController;
 use App\Http\Controllers\AdminFaqController;
 use App\Http\Controllers\CustomerAuthController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\LocalPayPalSetupController;
+use App\Http\Controllers\LocalOpenWeatherSetupController;
+use App\Http\Controllers\LocalGoogleCalendarSetupController;
+use App\Http\Controllers\AdminGoogleCalendarController;
+
+if (app()->environment('local')) {
+    Route::middleware(['signed', 'throttle:5,1'])->group(function () {
+        Route::get('/_local/paypal-setup', [LocalPayPalSetupController::class, 'show'])->name('local.paypal.setup');
+        Route::post('/_local/paypal-setup', [LocalPayPalSetupController::class, 'store']);
+        Route::get('/_local/openweather-setup', [LocalOpenWeatherSetupController::class, 'show'])->name('local.openweather.setup');
+        Route::post('/_local/openweather-setup', [LocalOpenWeatherSetupController::class, 'store']);
+        Route::get('/_local/google-calendar-setup', [LocalGoogleCalendarSetupController::class, 'show'])->name('local.google-calendar.setup');
+        Route::post('/_local/google-calendar-setup', [LocalGoogleCalendarSetupController::class, 'store']);
+    });
+}
 
 Route::get('/', [SiteController::class, 'home'])->name('home');
 Route::get('/services', fn () => app(SiteController::class)->page('services'))->name('services');
@@ -67,9 +82,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::patch('/services/{service}', [AdminServiceController::class, 'update'])->name('services.update');
         Route::get('/customers', [AdminCustomerController::class, 'index'])->name('customers.index');
         Route::get('/integrations', [AdminIntegrationController::class, 'index'])->name('integrations.index');
+        Route::post('/integrations/verify-paypal', [AdminIntegrationController::class, 'verifyPayPal'])->middleware('throttle:5,1')->name('integrations.verify-paypal');
+        Route::post('/integrations/google-calendar/connect', [AdminGoogleCalendarController::class, 'connect'])->middleware('throttle:5,1')->name('google-calendar.connect');
+        Route::get('/integrations/google-calendar/callback', [AdminGoogleCalendarController::class, 'callback'])->middleware('throttle:5,1')->name('google-calendar.callback');
+        Route::post('/integrations/google-calendar/verify', [AdminGoogleCalendarController::class, 'verify'])->middleware('throttle:5,1')->name('google-calendar.verify');
+        Route::post('/appointments/{appointment}/sync-calendar', [AdminGoogleCalendarController::class, 'sync'])->middleware('throttle:10,1')->name('appointments.sync-calendar');
         Route::post('/integrations/verify-service-area', [AdminIntegrationController::class, 'verifyServiceArea'])->middleware('throttle:1,1')->name('integrations.verify-service-area');
         Route::resource('faqs', AdminFaqController::class)->except('show');
-        Route::post('/appointments/{appointment}/lookup-address', [AdminIntegrationController::class, 'lookupAddress'])->middleware('throttle:10,1')->name('appointments.lookup-address');
         Route::get('/subscriptions', [AdminSubscriptionController::class, 'index'])->name('subscriptions.index');
         Route::patch('/subscriptions/{subscription}', [AdminSubscriptionController::class, 'update'])->name('subscriptions.update');
     });

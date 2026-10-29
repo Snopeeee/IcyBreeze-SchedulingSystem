@@ -3,6 +3,9 @@
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex"><title>{{ $title ?? 'Admin Dashboard' }} | IcyBreeze</title><link rel="icon" type="image/png" sizes="512x512" href="{{ asset('images/icybreeze-favicon.png') }}">@vite(['resources/css/app.css','resources/js/app.js'])<style>:root{--hero-image:url('{{ asset('images/icybreeze-breeze-hero.png') }}');--brand-mark-image:url('{{ asset('images/icybreeze-brand-mark.png') }}');--brand-mark-inverse-image:url('{{ asset('images/icybreeze-brand-mark-inverse.png') }}')}</style></head>
 <body class="admin-body">
 <a class="skip-link" href="#main-content">Skip to content</a>
+@if (app()->environment('staging'))
+<div class="demo-notice" role="status">School presentation demo · Test data only · PayPal Sandbox is not a live payment method</div>
+@endif
 <div class="admin-shell">
     <aside class="admin-sidebar">
         <a class="admin-logo" href="{{ route('admin.dashboard') }}"><img class="admin-logo-full" src="{{ asset('images/icybreeze-logo-compact-inverse.png') }}" alt="IcyBreeze Aircon Cleaning"><img class="admin-logo-mark" src="{{ asset('images/icybreeze-brand-mark-inverse.png') }}" alt=""></a>

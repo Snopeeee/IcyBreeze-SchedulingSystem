@@ -170,6 +170,15 @@ class IcyBreezeSystemTest extends TestCase
         $this->assertSame('in_progress', collect($inProgress)->firstWhere('time', '13:00')['status']);
     }
 
+    public function test_signed_in_customer_can_check_availability_without_sending_an_email_address(): void
+    {
+        $this->service();
+        $this->actingAs(User::factory()->create(['role' => 'customer']))
+            ->getJson('/book/availability?date='.now()->addDays(3)->toDateString().'&quantity=1')
+            ->assertOk()
+            ->assertJsonCount(3, 'slots');
+    }
+
     public function test_booking_requires_a_landmark_and_rejects_retired_arrival_times(): void
     {
         $service = $this->service();

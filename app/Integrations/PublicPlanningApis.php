@@ -31,43 +31,6 @@ class PublicPlanningApis
         });
     }
 
-    public function upcomingHolidays(): array
-    {
-        $year = now()->year;
-        $holidays = Cache::remember('planning:holidays:'.$year, now()->addDay(), function () use ($year): array {
-            $data = Http::acceptJson()->timeout(8)->get("https://date.nager.at/api/v3/PublicHolidays/{$year}/PH")->throw()->json();
-            if (! is_array($data) || ! array_is_list($data)) {
-                throw new RuntimeException('Holiday data is incomplete.');
-            }
-
-            return collect($data)->filter(fn ($holiday) => is_array($holiday) && isset($holiday['date'], $holiday['localName']))
-                ->map(fn ($holiday) => ['date' => $holiday['date'], 'name' => $holiday['localName']])->all();
-        });
-
-        return collect($holidays)->filter(fn ($holiday) => $holiday['date'] >= today()->toDateString())->take(3)->values()->all();
-    }
-
-    public function daylight(): array
-    {
-        return Cache::remember('planning:daylight:'.today()->toDateString(), now()->addDay(), function (): array {
-            $data = Http::acceptJson()->timeout(8)->get('https://api.sunrise-sunset.org/v2', [
-                'lat' => self::LATITUDE,
-                'lng' => self::LONGITUDE,
-                'date' => today()->toDateString(),
-                'tz' => 'Asia/Manila',
-            ])->throw()->json();
-
-            if (! is_string($data['sunrise'] ?? null) || ! is_string($data['sunset'] ?? null)) {
-                throw new RuntimeException('Daylight data is incomplete.');
-            }
-
-            return [
-                'sunrise' => \Carbon\Carbon::parse($data['sunrise'])->format('g:i A'),
-                'sunset' => \Carbon\Carbon::parse($data['sunset'])->format('g:i A'),
-            ];
-        });
-    }
-
     public function serviceArea(): array
     {
         // Only the public city name is sent. Never send a customer's private address to this service.

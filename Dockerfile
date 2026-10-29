@@ -38,12 +38,14 @@ RUN apt-get update \
         libcurl4-openssl-dev \
         libicu-dev \
         libonig-dev \
+        libpq-dev \
         default-mysql-client \
+        postgresql-client \
         libsqlite3-dev \
         libxml2-dev \
         libzip-dev \
         unzip \
-    && docker-php-ext-install -j"$(nproc)" curl dom intl mbstring opcache pdo_mysql pdo_sqlite xml zip \
+    && docker-php-ext-install -j"$(nproc)" curl dom intl mbstring opcache pdo_mysql pdo_pgsql pdo_sqlite xml zip \
     && a2enmod expires headers rewrite \
     && rm -rf /var/lib/apt/lists/*
 
@@ -97,7 +99,7 @@ RUN composer dump-autoload --no-dev --classmap-authoritative --no-interaction --
 EXPOSE 80
 
 HEALTHCHECK --interval=15s --timeout=5s --start-period=30s --retries=5 \
-    CMD curl --fail --silent --show-error http://127.0.0.1/up || exit 1
+    CMD curl --fail --silent --show-error "http://127.0.0.1:${PORT:-80}/up" || exit 1
 
 ENTRYPOINT ["icybreeze-entrypoint"]
 CMD ["apache2-foreground"]

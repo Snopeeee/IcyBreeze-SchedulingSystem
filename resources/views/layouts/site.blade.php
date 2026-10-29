@@ -29,15 +29,23 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="{{ $description ?? $business['description'] }}">
+    @if (app()->environment('staging'))
+        <meta name="robots" content="noindex,nofollow">
+    @endif
     <title>{{ isset($title) ? $title.' | IcyBreeze Aircon Cleaning' : 'IcyBreeze Aircon Cleaning' }}</title>
     <link rel="icon" type="image/png" sizes="512x512" href="{{ asset('images/icybreeze-favicon.png') }}">
     <link rel="apple-touch-icon" href="{{ asset('images/icybreeze-favicon.png') }}">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>:root{--hero-image:url('{{ asset('images/icybreeze-breeze-hero.png') }}');--brand-mark-image:url('{{ asset('images/icybreeze-brand-mark.png') }}');--brand-mark-inverse-image:url('{{ asset('images/icybreeze-brand-mark-inverse.png') }}')}</style>
-    <script type="application/ld+json">{!! json_encode($businessSchema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}</script>
+    @unless (app()->environment('staging'))
+        <script type="application/ld+json">{!! json_encode($businessSchema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}</script>
+    @endunless
 </head>
 <body class="site-body">
     <a class="skip-link" href="#main-content">Skip to content</a>
+    @if (app()->environment('staging'))
+        <div class="demo-notice" role="status">School presentation demo · Appointments are test records · PayPal uses Sandbox only; no real payments</div>
+    @endif
     <div class="topbar">
         <div class="site-shell topbar-inner">
             <div class="topbar-contact">

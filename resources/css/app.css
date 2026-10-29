@@ -6025,6 +6025,14 @@ body.site-body {
 .paypal-payment-option strong { color: var(--navy); font-size: 18px; }
 .paypal-payment-option p { margin: 6px 0 0; color: #55748a; line-height: 1.5; }
 .integration-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 24px; }
+.integration-overview { grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); }
+.integration-detail-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+.integration-detail-grid > :last-child { grid-column: 1 / -1; }
+.integration-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+.integration-source-note { display: block; margin-top: 18px; color: #55748a; line-height: 1.5; }
+.integration-source-note a { color: var(--navy); text-decoration: underline; }
+.integration-key-metric { font-size: 20px; font-weight: 700; color: var(--navy) !important; }
+.integration-key-metric span { font-size: 15px; font-weight: 400; }
 .integration-card { min-height: 142px; padding: 23px; }
 .integration-card-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
 .integration-card h2 { margin: 0; font-size: 21px; }
@@ -6037,9 +6045,8 @@ body.site-body {
 .integration-weather-grid span { color: #345b72; }
 .integration-weather-grid small { color: #55748a; }
 .integration-help { margin-top: 18px; color: #55748a; line-height: 1.6; }
-.location-result { display: grid; gap: 8px; margin-top: 18px; padding: 16px; border: 1px solid #cfe8f4; border-radius: 14px; background: #f3fbff; }
-.location-result span { color: #55748a; }
 @media (max-width: 760px) { .integration-weather-grid { grid-template-columns: 1fr; } .paypal-payment-option form, .paypal-payment-option .button { width: 100%; } }
+@media (max-width: 760px) { .integration-detail-grid { grid-template-columns: 1fr; } .integration-detail-grid > :last-child { grid-column: auto; } }
 
 /* Customer accounts and editable FAQ management */
 .account-section { min-height: 70vh; display: grid; place-items: center; padding: 80px 20px; background: radial-gradient(circle at 72% 18%, #c8edff 0, transparent 42%), linear-gradient(145deg, #f7fcff, #eaf8ff); }
@@ -6067,3 +6074,13 @@ body.site-body {
 .faq-form-card { max-width: 780px; padding: 30px; }
 .integration-card small { display: block; margin-top: 15px; color: #55748a; line-height: 1.5; }
 .integration-card small a { color: var(--navy); text-decoration: underline; }
+/* Keep non-production payment and booking status visible on every page. */
+.demo-notice {
+    padding: .65rem 1rem;
+    background: #fdd95b;
+    color: #185079;
+    text-align: center;
+    font-weight: 700;
+    font-size: .9rem;
+    line-height: 1.4;
+}

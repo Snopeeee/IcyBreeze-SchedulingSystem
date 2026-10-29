@@ -8,7 +8,6 @@ use App\Models\AirconUnitType;
 use App\Models\Customer;
 use App\Models\Payment;
 use App\Models\Service;
-use App\Integrations\BookingNotifications;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\JsonResponse;
@@ -41,17 +40,13 @@ class BookingController extends Controller
             'quantity' => ['nullable', 'integer', 'min:1', 'max:5'],
         ]);
 
-        if ($request->user() && ! $request->user()->isAdmin() && Str::lower($data['email']) !== Str::lower($request->user()->email)) {
-            return back()->withErrors(['email' => 'Please use the email address on your customer account.'])->withInput();
-        }
-
         return response()->json([
             'date' => $data['date'],
             'slots' => $this->availabilityFor($data['date'], (int) ($data['quantity'] ?? 1)),
         ]);
     }
 
-    public function store(Request $request, BookingNotifications $notifications): RedirectResponse
+    public function store(Request $request): RedirectResponse
     {
         $data = $request->validate([
             'aircon_unit_type_id' => [
@@ -162,8 +157,6 @@ class BookingController extends Controller
 
             return $appointment;
         });
-
-        $notifications->send($appointment);
 
         return redirect()->route('booking.success', [
             'reference' => $appointment->reference,

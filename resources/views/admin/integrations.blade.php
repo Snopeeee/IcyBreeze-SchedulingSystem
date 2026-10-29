@@ -2,62 +2,91 @@
 @php($title = 'API Integrations')
 
 @section('content')
-<div class="admin-top"><div><span class="admin-eyebrow">Connected services</span><h1>API Integrations</h1><p>Five external APIs support appointment planning and service-area checks. Provider data is advisory; bookings remain authoritative in our database.</p></div></div>
+<div class="admin-top">
+    <div>
+        <span class="admin-eyebrow">Five essential services</span>
+        <h1>API Integrations</h1>
+        <p>Payments, weather, scheduling, air quality, and service-area verification work alongside the IcyBreeze booking system. Appointments and payment records remain in our own database.</p>
+    </div>
+</div>
 
-<div class="integration-grid">
+<div class="integration-grid integration-overview">
     @foreach($integrations as $integration)
         <article class="admin-card integration-card">
-            <div class="integration-card-head"><h2>{{ $integration['name'] }}</h2><span class="status-badge {{ $integration['active'] === true ? 'status-paid' : 'status-pending' }}">{{ $integration['active'] === null ? 'Check on demand' : ($integration['active'] ? 'Connected' : 'Unavailable') }}</span></div>
+            <div class="integration-card-head">
+                <h2>{{ $integration['name'] }}</h2>
+                <span class="status-badge {{ $integration['active'] ? 'status-paid' : 'status-pending' }}">{{ $integration['status'] }}</span>
+            </div>
             <p>{{ $integration['purpose'] }}</p>
         </article>
     @endforeach
 </div>
 
-<section class="admin-card integration-forecast">
-    <div class="admin-card-header"><div><span class="admin-eyebrow">Iligan City</span><h2>Service Planning Forecast</h2></div><span>Source: OpenWeather</span></div>
-    @if(!$integrations[0]['active'] && !$weatherError)
-        <p>Add an OpenWeather API key to view forecast conditions for upcoming service windows.</p>
-    @elseif($weatherError)
-        <p>The forecast is temporarily unavailable. Existing appointments are unaffected.</p>
-    @elseif(count($forecast) === 0)
-        <p>There are no daytime forecast windows available right now.</p>
-    @else
-        <div class="integration-weather-grid">
-            @foreach($forecast as $window)
-                <div><strong>{{ $window['time'] }}</strong><span>{{ $window['temperature'] }}°C · {{ ucfirst($window['description']) }}</span><small>{{ $window['rain_chance'] }}% chance of rain</small></div>
-            @endforeach
-        </div>
-    @endif
-</section>
+<div class="integration-detail-grid">
+    <section class="admin-card integration-forecast">
+        <div class="admin-card-header"><div><span class="admin-eyebrow">01 · Payment</span><h2>PayPal Sandbox</h2></div><span>Test transactions only</span></div>
+        <p>Customers can try the PayPal payment flow from their private booking page using a Sandbox buyer account. No real money is charged, and Sandbox checkout is disabled in production.</p>
+        @if($paypalConfigured)
+            <form method="POST" action="{{ route('admin.integrations.verify-paypal') }}">@csrf<button class="button button-navy button-small" type="submit">Verify Sandbox connection</button></form>
+            <small class="integration-source-note">Verification requests an access token only. It does not create an order or charge.</small>
+        @else
+            <p>Add Sandbox credentials through the signed localhost setup screen or local environment variables before testing checkout.</p>
+        @endif
+    </section>
 
-<div class="integration-grid">
-    <section class="admin-card integration-card"><h2>Air quality today</h2>
-        @if($planningData['airQuality'])<p><strong>AQI {{ $planningData['airQuality']['aqi'] }}</strong> · PM2.5 {{ $planningData['airQuality']['pm25'] }} µg/m³</p><small>Outdoor estimate only; not an indoor air-quality measurement.</small>
-        @else<p>Air-quality data is temporarily unavailable.</p>@endif
-        <small>Data: <a href="https://open-meteo.com/en/docs/air-quality-api" target="_blank" rel="noopener noreferrer">Open-Meteo / CAMS ENSEMBLE</a>. Free endpoint is for non-commercial school demonstration.</small>
+    <section class="admin-card integration-forecast">
+        <div class="admin-card-header"><div><span class="admin-eyebrow">02 · Forecast</span><h2>OpenWeather</h2></div><span>Iligan City</span></div>
+        @if(!$weatherConfigured)
+            <p>Add an OpenWeather API key to view rain and temperature forecasts for upcoming service windows.</p>
+        @elseif($weatherError)
+            <p>The forecast service is temporarily unavailable. Your appointments are unaffected; refresh this page when the connection returns.</p>
+        @elseif(count($forecast) === 0)
+            <p>OpenWeather is connected, but no daytime forecast windows were returned right now.</p>
+        @else
+            <div class="integration-weather-grid">
+                @foreach($forecast as $window)
+                    <div><strong>{{ $window['time'] }}</strong><span>{{ $window['temperature'] }}°C · {{ ucfirst($window['description']) }}</span><small>{{ $window['rain_chance'] }}% chance of rain</small></div>
+                @endforeach
+            </div>
+        @endif
+        <small class="integration-source-note">Forecast data: <a href="https://openweathermap.org/forecast5" target="_blank" rel="noopener noreferrer">OpenWeather</a>.</small>
     </section>
-    <section class="admin-card integration-card"><h2>Upcoming public holidays</h2>
-        @forelse($planningData['upcomingHolidays'] ?? [] as $holiday)<p><strong>{{ \Carbon\Carbon::parse($holiday['date'])->format('M j') }}</strong> · {{ $holiday['name'] }}</p>
-        @empty<p>No upcoming holidays returned for the current year.</p>@endforelse
-        <small>Source: <a href="https://date.nager.at/Api" target="_blank" rel="noopener noreferrer">Nager.Date</a>. Confirm local observances separately.</small>
+
+    <section class="admin-card integration-forecast">
+        <div class="admin-card-header"><div><span class="admin-eyebrow">03 · Scheduling</span><h2>Google Calendar</h2></div><span class="status-badge {{ $calendarConnected ? 'status-paid' : 'status-pending' }}">{{ $calendarConnected ? 'Connected' : ($calendarConfigured ? 'Authorization needed' : 'Not configured') }}</span></div>
+        <p>After reviewing an appointment, an administrator can sync its booking reference and time to the connected calendar. Customer contact details and addresses are never included in the event.</p>
+        @if($calendarConfigured)
+            <div class="integration-actions">
+                <form method="POST" action="{{ route('admin.google-calendar.connect') }}">@csrf<button class="button button-navy button-small" type="submit">{{ $calendarConnected ? 'Reconnect Calendar' : 'Connect Calendar' }}</button></form>
+                @if($calendarConnected)<form method="POST" action="{{ route('admin.google-calendar.verify') }}">@csrf<button class="button button-ghost button-small" type="submit">Verify access</button></form>@endif
+            </div>
+        @else
+            <p>Set up a Google OAuth Web client and enable the Calendar API. Authorized callback: <code>{{ route('admin.google-calendar.callback') }}</code>.</p>
+        @endif
+        <small class="integration-source-note">Verification reads only the Calendar API response. Appointment syncing is a separate, manual action.</small>
     </section>
-    <section class="admin-card integration-card"><h2>Daylight in Iligan</h2>
-        @if($planningData['daylight'])<p><strong>Sunrise {{ $planningData['daylight']['sunrise'] }}</strong><br>Sunset {{ $planningData['daylight']['sunset'] }}</p>
-        @else<p>Daylight times are temporarily unavailable.</p>@endif
-        <small>Source: <a href="https://sunrise-sunset.org/api" target="_blank" rel="noopener noreferrer">Sunrise-Sunset.org</a>.</small>
+
+    <section class="admin-card integration-forecast">
+        <div class="admin-card-header"><div><span class="admin-eyebrow">04 · Air quality</span><h2>Open-Meteo Air Quality</h2></div><span>Iligan City</span></div>
+        @if($airQuality)
+            <p class="integration-key-metric">AQI {{ $airQuality['aqi'] }} <span>· PM2.5 {{ $airQuality['pm25'] }} µg/m³</span></p>
+            <p>Outdoor conditions help the team plan service visits. This is an outdoor estimate, not a measurement of air quality inside a customer's home.</p>
+        @else
+            <p>Air-quality data is temporarily unavailable. Existing bookings are unaffected.</p>
+        @endif
+        <small class="integration-source-note">Data: <a href="https://open-meteo.com/en/docs/air-quality-api" target="_blank" rel="noopener noreferrer">Open-Meteo / CAMS ENSEMBLE</a>. Non-commercial educational use only.</small>
     </section>
-    <section class="admin-card integration-card"><h2>Service-area map check</h2><p>Look up the public city location only. Customer street addresses are never sent to OpenStreetMap.</p>
+
+    <section class="admin-card integration-forecast">
+        <div class="admin-card-header"><div><span class="admin-eyebrow">05 · Service area</span><h2>OpenStreetMap</h2></div><span>On-demand check</span></div>
+        <p>Check the public location of Iligan City without sending any customer's street address to the mapping service.</p>
         <form method="POST" action="{{ route('admin.integrations.verify-service-area') }}">@csrf<button class="button button-ghost button-small" type="submit">Verify Iligan City</button></form>
-        @if(session('service_area_result'))<p><strong>{{ session('service_area_result.name') }}</strong><br>{{ session('service_area_result.latitude') }}, {{ session('service_area_result.longitude') }}</p>@endif
-        <small>© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap contributors</a> · <a href="https://operations.osmfoundation.org/policies/nominatim/" target="_blank" rel="noopener noreferrer">Nominatim usage policy</a>.</small>
+        @if(session('service_area_result'))
+            <p class="integration-key-metric">{{ session('service_area_result.name') }} <span>· {{ session('service_area_result.latitude') }}, {{ session('service_area_result.longitude') }}</span></p>
+        @endif
+        <small class="integration-source-note">Location data © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap contributors</a>; lookup via <a href="https://operations.osmfoundation.org/policies/nominatim/" target="_blank" rel="noopener noreferrer">Nominatim</a>.</small>
     </section>
 </div>
 
-<section class="admin-card integration-forecast"><div class="admin-card-header"><div><span class="admin-eyebrow">Optional provider setup</span><h2>Additional integrations</h2></div></div><div class="integration-grid">
-@foreach($optionalIntegrations as $integration)
-<div><strong>{{ $integration['name'] }}</strong> <span class="status-badge {{ $integration['active'] ? 'status-paid' : 'status-pending' }}">{{ $integration['active'] ? 'Configured' : 'Not configured' }}</span><p>{{ $integration['purpose'] }}</p></div>
-@endforeach
-</div><p>PayPal sandbox uses test money only. Never present sandbox transactions as real customer payments.</p></section>
-
-<p class="integration-help">Credentialed integrations use local environment settings or Railway service variables. No API keys are shown on this page. External API outages do not affect stored appointments.</p>
+<p class="integration-help">Private credentials are stored in encrypted local settings or environment variables and are never displayed here. External-service interruptions do not erase or change stored appointments.</p>
 @endsection

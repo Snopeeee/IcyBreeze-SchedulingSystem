@@ -11,11 +11,13 @@ class PayPalCheckout
 {
     public function available(): bool
     {
-        return (bool) config('integrations.paypal.enabled')
-            && in_array(config('integrations.paypal.mode'), ['sandbox', 'live'], true)
-            && (! app()->environment('production') || config('integrations.paypal.mode') === 'live')
-            && filled(config('integrations.paypal.client_id'))
-            && filled(config('integrations.paypal.client_secret'));
+        $localCredentials = app(LocalPayPalCredentials::class)->read();
+
+        return ((bool) config('integrations.paypal.enabled') || $localCredentials !== null)
+            && config('integrations.paypal.mode') === 'sandbox'
+            && ! app()->environment('production')
+            && filled($localCredentials['client_id'] ?? config('integrations.paypal.client_id'))
+            && filled($localCredentials['client_secret'] ?? config('integrations.paypal.client_secret'));
     }
 
     public function createOrder(Appointment $appointment): array
@@ -114,9 +116,10 @@ class PayPalCheckout
             throw new RuntimeException('PayPal is not configured.');
         }
 
+        $localCredentials = app(LocalPayPalCredentials::class)->read();
         $token = Http::asForm()->withBasicAuth(
-            config('integrations.paypal.client_id'),
-            config('integrations.paypal.client_secret'),
+            $localCredentials['client_id'] ?? config('integrations.paypal.client_id'),
+            $localCredentials['client_secret'] ?? config('integrations.paypal.client_secret'),
         )->timeout(10)->post($this->baseUrl().'/v1/oauth2/token', [
             'grant_type' => 'client_credentials',
         ])->throw()->json('access_token');
@@ -126,6 +129,11 @@ class PayPalCheckout
         }
 
         return $token;
+    }
+
+    public function verifySandboxConnection(): void
+    {
+        $this->accessToken();
     }
 
     private function approvalUrl(array $order): ?string
@@ -145,9 +153,7 @@ class PayPalCheckout
 
     private function baseUrl(): string
     {
-        return config('integrations.paypal.mode') === 'live'
-            ? 'https://api-m.paypal.com'
-            : 'https://api-m.sandbox.paypal.com';
+        return 'https://api-m.sandbox.paypal.com';
     }
 
     private function amount(int $centavos): string

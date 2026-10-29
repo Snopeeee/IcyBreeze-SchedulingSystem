@@ -46,6 +46,14 @@ C:\xampp\php\php.exe artisan app:create-admin admin@your-domain.com
 
 The command securely prompts for a strong password. Customers use the public booking form; their private links show their own booking details.
 
+If an existing local administrator forgets the password, reset only that password with an interactive, hidden prompt:
+
+```powershell
+C:\xampp\php\php.exe artisan app:reset-local-admin-password admin@icybreeze.local
+```
+
+This command is local-only and does not change the administrator's email, phone, name, or role. Do not put a password on a command line or in a chat message.
+
 ## Run locally with XAMPP MySQL
 
 With XAMPP Apache and MySQL running, open `http://localhost/SchedulingSystem/public/`. The admin area is at `/SchedulingSystem/public/admin`. Laravel's `public` folder is the web entry point; do not expose the application root as a website.
@@ -83,6 +91,14 @@ docker compose down
 
 Do not use `docker compose down -v` unless you intentionally want to delete Docker-managed application storage and the generated container application key. MySQL data remains managed by XAMPP.
 
+## Short-lived Render presentation deployment
+
+`render.yaml` describes a separate free Docker web service and free PostgreSQL database for a school demonstration. It does **not** migrate or overwrite the XAMPP MySQL database. Render's free PostgreSQL database expires after 30 days and has no backups; do not use it for real customer records. The free web service can sleep when idle, so allow time for its first request before presenting.
+
+Create a Render Blueprint from this repository and select the branch containing `render.yaml`. Supply `ADMIN_EMAIL` and a new strong `ADMIN_PASSWORD` privately in Render; do not share the password in chat or Git. Add the PayPal **Sandbox** client ID and secret, OpenWeather API key, and Google Calendar OAuth client ID and secret to the corresponding private Render variables. The Blueprint generates a persistent app encryption key and links the private PostgreSQL URL. The hosted app is marked as a demo and uses `APP_ENV=staging`, `APP_DEBUG=false`, and `PAYPAL_MODE=sandbox` so test payments cannot be confused with live payments.
+
+After Render assigns a `*.onrender.com` hostname, add its exact `https://.../admin/integrations/google-calendar/callback` URI to the Google Cloud OAuth Web client. Sign in to the demo administrator account and reconnect Google Calendar; the local refresh token does not transfer. Verify all five integrations on `/admin/integrations` against the hosted environment. Before any real launch, move to durable database hosting, set `APP_ENV=production`, disable Sandbox checkout, review security and backups, and replace the educational keyless API usage as needed.
+
 ## Retired technician module
 
 Technician logins, account management, job assignment, GPS collection, and route optimization are no longer available. Existing migrations and historical database fields remain for data preservation; no customer, booking, payment, or subscription records are deleted. Older assigned appointments are treated as confirmed and continue to block overlapping bookings. The existing price catalog and financial splits remain unchanged.
@@ -99,31 +115,25 @@ The public site reads the official contact, location, social, and operating-hour
 
 Customer accounts can register, sign in, book while signed in, and see only the appointments made under that account. Earlier guest appointments retain their private management links and are not automatically claimed by an unverified email address. Administrators have a complete FAQ create/read/update/delete workflow; published answers appear on the public FAQ page. Booking, payments, service prices, and the admin dashboard continue to use the application database.
 
-The admin **API Integrations** page uses five external APIs for service planning. It does not expose credentials, send private customer addresses to public mapping services, or let an API outage alter stored bookings.
+The admin **API Integrations** page presents exactly five integrations: PayPal Sandbox, OpenWeather, Google Calendar, Open-Meteo Air Quality, and OpenStreetMap Nominatim. The page does not expose credentials, send private customer addresses to public mapping services, or let an API outage alter stored bookings.
 
 | API | Purpose | Access |
 | --- | --- | --- |
-| OpenWeather | Rain and temperature forecast for Iligan service windows | API key in `OPENWEATHER_API_KEY` |
+| PayPal Sandbox | Test-only payment on a private booking page | Encrypted local Sandbox credentials or `PAYPAL_CLIENT_ID` and `PAYPAL_CLIENT_SECRET` |
+| OpenWeather | Rain and temperature forecast for Iligan service windows | Encrypted local key or `OPENWEATHER_API_KEY` |
+| Google Calendar | Administrator-authorized appointment sync | OAuth client and admin consent |
 | Open-Meteo Air Quality | Current outdoor AQI and PM2.5 advisory | Keyless non-commercial school demo; attribution shown |
-| Nager.Date | Philippine public-holiday awareness | Keyless |
-| Sunrise-Sunset.org | Daylight times for afternoon service planning | Keyless; attribution shown |
 | OpenStreetMap Nominatim | Admin-initiated, public Iligan City service-area check | Keyless; cached and rate-limited, with attribution |
 
 Nominatim is queried only on an admin action, at most once per minute per user, and only with the city name—never a customer's street address. The result must fall within the Iligan area before it is shown. The public Open-Meteo endpoint is limited to non-commercial educational use and should be replaced with a commercial license or another source before commercial operation.
 
-The original credentialed integrations remain available for later setup: PayPal, Resend, Twilio, and Google Maps Geocoding. Configure them in `.env` for local PHP or Docker, or in Railway service variables. Unconfigured services do not make external requests.
+The retired Resend, Twilio, Google Maps Geocoding, Nager.Date, and Sunrise-Sunset integrations are not part of the application. No provider-specific credentials are committed to Git. PayPal Sandbox checkout is disabled in production and cannot take real customer payments.
 
-| Provider | Purpose | Required variables |
-| --- | --- | --- |
-| PayPal | Optional payment on the private booking page | `PAYPAL_ENABLED`, `PAYPAL_MODE`, `PAYPAL_CLIENT_ID`, `PAYPAL_CLIENT_SECRET` |
-| Resend | Booking confirmation email | `RESEND_API_KEY`, `RESEND_FROM_ADDRESS` |
-| Twilio | Booking confirmation SMS | `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_FROM_NUMBER` |
-| Google Maps | Admin-initiated address lookup | `GOOGLE_MAPS_GEOCODING_KEY` |
-| OpenWeather | Cached Iligan forecast in admin | `OPENWEATHER_API_KEY` |
+Google Calendar uses a separate OAuth Web client. In Google Cloud, enable the Google Calendar API, leave the app in **Testing**, add the administrator's Google account as a test user, and authorize the exact callback URI shown on the admin integrations page. For local development, the OAuth Client ID and Secret may be stored through the signed localhost setup screen in encrypted MySQL; alternatively set `GOOGLE_CALENDAR_CLIENT_ID` and `GOOGLE_CALENDAR_CLIENT_SECRET` in the environment. The default target is the authorized account's primary calendar; `GOOGLE_CALENDAR_ID` can select a different calendar. The administrator must then use **Connect Google Calendar** and approve the requested `calendar.events.owned` scope. On each confirmed appointment page, **Sync to Google Calendar** creates or updates a private event containing only the booking reference, time, and status. Cancelled/no-show appointments remove their corresponding event. Sync is manual; existing bookings and payments do not depend on Google Calendar availability. A local OAuth client and redirect URI cannot be reused on a future host without updating Google Cloud settings.
 
-Every booking still creates a cash-after-service payment record. When PayPal is configured in a **non-production** environment, the customer can test online payment from the private booking page using `PAYPAL_MODE=sandbox` and a PayPal sandbox buyer account. The server creates and captures a PayPal order, then verifies its appointment reference, currency, amount, and completed capture before marking the test payment paid. This is test money only; do not use the sandbox for real customer payments. In production, PayPal is shown only with `PAYPAL_MODE=live` and live merchant credentials. If PayPal is unconfigured, cash remains the available method. If the customer return flow is interrupted after capture, an admin can verify the pending order with PayPal on the Payments page. An admin can switch an uncaptured PayPal order back to cash after the provider confirms it has no capture. PayPal refunds and automated webhook reconciliation are not included yet.
+Every booking still creates a cash-after-service payment record. When PayPal is configured in a **non-production** environment, the customer can test online payment from the private booking page using `PAYPAL_MODE=sandbox` and a PayPal Sandbox buyer account. The server creates and captures a test order, then verifies its appointment reference, currency, amount, and completed capture before marking the test payment paid. This is test money only; Sandbox checkout is disabled in production. If PayPal is unconfigured or unreachable, cash remains available. The administrator can verify the Sandbox credentials without creating an order from the API Integrations page. If the customer return flow is interrupted after capture, an admin can verify the pending order with PayPal on the Payments page. An admin can switch an uncaptured PayPal order back to cash after the provider confirms it has no capture. PayPal refunds and automated webhook reconciliation are not included yet.
 
-Resend requires a verified sending domain. Twilio requires an approved sender and may require a verified test recipient on trial accounts. Google Maps Geocoding requires a Google Cloud project with billing enabled. OpenWeather requires its own API key. These providers may charge for usage. The address lookup runs only when an admin requests it and does not store coordinates or track the customer.
+For a local presentation, open `/admin/integrations` after administrator sign-in. The page shows all five selected services. Use **Verify Sandbox connection** to test PayPal credentials without making a payment; review the three OpenWeather forecast windows; use **Verify access** for Google Calendar without changing events; read the Open-Meteo AQI; and use **Verify Iligan City** for the OpenStreetMap lookup. To demonstrate Sandbox checkout, create a test booking and use its private management page with a Sandbox buyer account. Do not use a real customer booking or real PayPal account for this test.
 
 ## Test
 
